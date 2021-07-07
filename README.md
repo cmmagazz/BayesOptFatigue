@@ -33,6 +33,7 @@ Main Scripts:
 
 * **m_simulation** - running protocols on simulated datasets
 * **m_experimentaltesting** - running protocols on real datasets during testing
+* **p_BIC_convergence** - runs many protocols on simulated data in paralell to demonstrate effects on distinguishability between models which changing variables and plots results.
 
 Calculation Functions:
 
@@ -43,15 +44,19 @@ Calculation Functions:
 * **B_STEP_simulate** - runs constant life bayesian step protocol
 * **g_bayes_beststepsize_stepstart** - runs step utility function for all possible test parameters and optuts maximum value
 * **g_bayesbeststress** - runs staircase utility function for all possible test parameters and optuts maximum value
-* ** g_calcprior** - updates parameter probabilities based on data and bayes theorem and outputs new log(prior)
+* **g_calcprior** - updates parameter probabilities based on data and bayes theorem and outputs new log(prior)
 * **g_STEP_UTILITY** - calculates the step utility function for a set of protocol parameters and prior model distribution
 * **g_UTILITY** - calculates the staircase utility function for a set of protocol parameters and prior model distribution
 * **f_HPD** - calculates the heighest prosterior density interval of a joint posterior distribution
+* **g_calcaic** - calculates AIC, BIC, and log-likelihood functions for normal, log-normal, and weibull distributions
+* **g_calcloglike** - calculates liklelihood functions and macimum log-likelihood
 
 Plotting Functions:
 
 * **p_HPD** - Plots the joint posterior HPD interval
 * **p_staircaseplot** - Plots staircase plots for data
+* **p_contourHPD** - Plots joint posterior HPD as a contour plot
+* **p_priorcomparison** - Plots comparison between multiple joint posteriors and includes marginal parameter probabilities
 
 ## Key Variables
 
