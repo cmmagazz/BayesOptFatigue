@@ -2,8 +2,8 @@
 
 ## Overview
 
-The repo contains a set of functions for performing bayesian statistics on fatigue data where for each sample the stress tested and whether the sample failed by a given number of cycles. The Functions can take either staircase-type (one stress per sample) or step-tpe (multiple stresses per sample increasing stress by a step size until failure).
-This is a companion to the paper Bayesian Optimised Collection Stretegies for fatigue Testing: Constant Life Testing (https://arxiv.org/abs/2107.02685)
+The repo contains a set of functions for performing bayesian statistics on fatigue data where for each sample the stress tested and whether the sample failed by a given number of cycles. The Functions can take either staircase-type (one stress per sample) or step-tpe (multiple stresses per sample increasing stress by a fixed step size until failure).
+This is a companion to the paper Bayesian Optimised Collection Strategies for fatigue Testing: Constant Life Testing (https://arxiv.org/abs/2107.02685)
 
 Based on the data, the functions can:
 
