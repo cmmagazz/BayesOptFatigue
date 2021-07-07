@@ -43,7 +43,7 @@ Calculation Functions:
 * **B_STEP_simulate** - runs constant life bayesian step protocol
 * **g_bayes_beststepsize_stepstart** - runs step utility function for all possible test parameters and optuts maximum value
 * **g_bayesbeststress** - runs staircase utility function for all possible test parameters and optuts maximum value
-* ** g_calcprior** - updates parameter probabilities based on data and bayes theorem and outputs new log(prior)
+* **g_calcprior** - updates parameter probabilities based on data and bayes theorem and outputs new log(prior)
 * **g_STEP_UTILITY** - calculates the step utility function for a set of protocol parameters and prior model distribution
 * **g_UTILITY** - calculates the staircase utility function for a set of protocol parameters and prior model distribution
 * **f_HPD** - calculates the heighest prosterior density interval of a joint posterior distribution
