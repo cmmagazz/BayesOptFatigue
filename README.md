@@ -32,13 +32,20 @@ A schematic flow diagram of the software is shown below:
 Main Scripts:
 
 * **m_simulation** - running protocols on simulated datasets
-* **m_experimentaltesting** - running protocols on real datasets during testing
+* **m_experimental** - running protocols on real datasets during testing
 
-Calculation Functions:
+General Calculation Functions:
 
-* **f_testing_protocol** - manages protocols based on previous samples
-* **f_createsample** - creates simulated sample set
-* **f_testingDAM** - tests simulated samples based on their determenistic SN curve
+* **Simulation framework**
+* f_testing_protocol - tests a simulated sample using a set protocol
+* f_createsample - creates simulated sample set
+* f_testingDAM - tests simulated samples based on their determenistic SN curve
+* **Experimental testing framework**
+* f_testing - tests a sample using a set protocol
+* f_findprevsamp - read through the experimental campaign variable to find previous completementary samples
+* f_SNresults - compile the results of an experimental campaign
+
+Bayesian Calculation Functions
 * **B_simulate** - runs constant life bayesian staircase protocol
 * **B_STEP_simulate** - runs constant life bayesian step protocol
 * **g_bayes_beststepsize_stepstart** - runs step utility function for all possible test parameters and optuts maximum value
@@ -52,6 +59,8 @@ Plotting Functions:
 
 * **p_HPD** - Plots the joint posterior HPD interval
 * **p_staircaseplot** - Plots staircase plots for data
+* **p_SN** - Plots an SN curve with (if available) three points: penultimate runout, final failure stress, and cycles to failure
+* **c_convergence** - Plots convergence, or error comparison, diagrams as in the paper linked. 
 
 ## Key Variables
 
