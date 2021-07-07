@@ -66,6 +66,8 @@ Plotting Functions:
 * **Shannon** - shanon information of joint posterior
 
 
+## Dependencies
+* ShadedErrorBar from https://www.mathworks.com/matlabcentral/fileexchange/26311-raacampbell-shadederrorbar
 
 
 
