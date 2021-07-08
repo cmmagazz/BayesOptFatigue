@@ -83,6 +83,12 @@ Plotting Functions:
 
 ## Dependencies
 * ShadedErrorBar from https://www.mathworks.com/matlabcentral/fileexchange/26311-raacampbell-shadederrorbar
+* MATLAB Parallel Computing Toolbox
+* MATLAB Statistics and machine learning toolbox
+* MATLAB Global optimisation toolbox (suggested)
+
+## Requirements
+* MATLAB version 2019a or later
 
 
 
