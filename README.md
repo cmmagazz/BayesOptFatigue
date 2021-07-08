@@ -2,8 +2,8 @@
 
 ## Overview
 
-The repo contains a set of functions for performing bayesian statistics on fatigue data where for each sample the stress tested and whether the sample failed by a given number of cycles. The Functions can take either staircase-type (one stress per sample) or step-tpe (multiple stresses per sample increasing stress by a step size until failure).
-This is a companion to the paper Bayesian Optimised Collection Stretegies for fatigue Testing: Constant Life Testing (https://arxiv.org/abs/2107.02685)
+The repo contains a set of functions for performing bayesian statistics on fatigue data where for each sample the stress tested and whether the sample failed by a given number of cycles. The Functions can take either staircase-type (one stress per sample) or step-tpe (multiple stresses per sample increasing stress by a fixed step size until failure).
+This is a companion to the paper Bayesian Optimised Collection Strategies for fatigue Testing: Constant Life Testing (https://arxiv.org/abs/2107.02685)
 
 Based on the data, the functions can:
 
@@ -32,14 +32,21 @@ A schematic flow diagram of the software is shown below:
 Main Scripts:
 
 * **m_simulation** - running protocols on simulated datasets
-* **m_experimentaltesting** - running protocols on real datasets during testing
 * **p_BIC_convergence** - runs many protocols on simulated data in paralell to demonstrate effects on distinguishability between models which changing variables and plots results.
+* **m_experimental** - running protocols on real datasets during testing
 
-Calculation Functions:
+General Calculation Functions:
 
-* **f_testing_protocol** - manages protocols based on previous samples
-* **f_createsample** - creates simulated sample set
-* **f_testingDAM** - tests simulated samples based on their determenistic SN curve
+* **Simulation framework**
+* f_testing_protocol - tests a simulated sample using a set protocol
+* f_createsample - creates simulated sample set
+* f_testingDAM - tests simulated samples based on their determenistic SN curve
+* **Experimental testing framework**
+* f_testing - tests a sample using a set protocol
+* f_findprevsamp - read through the experimental campaign variable to find previous completementary samples
+* f_SNresults - compile the results of an experimental campaign
+
+Bayesian Calculation Functions
 * **B_simulate** - runs constant life bayesian staircase protocol
 * **B_STEP_simulate** - runs constant life bayesian step protocol
 * **g_bayes_beststepsize_stepstart** - runs step utility function for all possible test parameters and optuts maximum value
@@ -57,6 +64,9 @@ Plotting Functions:
 * **p_staircaseplot** - Plots staircase plots for data
 * **p_contourHPD** - Plots joint posterior HPD as a contour plot
 * **p_priorcomparison** - Plots comparison between multiple joint posteriors and includes marginal parameter probabilities
+* **p_SN** - Plots an SN curve with (if available) three points: penultimate runout, final failure stress, and cycles to failure
+* **c_convergence** - Plots convergence, or error comparison, diagrams as in the paper linked. 
+
 
 ## Key Variables
 
@@ -71,6 +81,8 @@ Plotting Functions:
 * **Shannon** - shanon information of joint posterior
 
 
+## Dependencies
+* ShadedErrorBar from https://www.mathworks.com/matlabcentral/fileexchange/26311-raacampbell-shadederrorbar
 
 
 
