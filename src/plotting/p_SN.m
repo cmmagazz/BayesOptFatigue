@@ -30,7 +30,6 @@ failurestress=p.Results.failurestress;
 if ~isempty(failurestress)
     idS=isnan(failurestress(:,1)) & isnan(failurestress(:,3));
     failurestress(idS,:)=[];
-    %data=f_stripexcessrunouts(data);
 end
 
 runout=failurestress(:,4);
@@ -83,7 +82,8 @@ if nnz(~isnan(failurestress(:,1)).*~isnan(failurecycle(:)))>0
     end
 end
 xlabel('Cycle Number')
-%xlim([0 1e10])
+set(gca, 'XScale', 'log')
+xlim([10^floor(min(failurestress(:,4:5),[],'all')) 2*10^ceil(max(failurestress(:,4:5),[],'all'))])
 ylabel('Stress /MPa')
 title('S/N Diagram')
 time=clock;

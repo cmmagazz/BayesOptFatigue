@@ -49,8 +49,16 @@ if strcmp(ResultSet.details.protocol,'stress step')
         %until it breaks
         [failurestress(k,1),failurestress(k,2),failurestress(k,3),failurestress(k,5)]=f_testingDAM(TestingSet.details,TestingSet.meanFS(k,:),ResultSet.details);
         failurestress(k,6)=1;
+        failurestress(k,4)=ResultSet.details.runout;
+        
+        if isfield(ResultSet, 'plotq')
+            if ResultSet.plotq==1
+                figure(2)
+                p_SN(failurestress,'newfig',0)
+                drawnow
+            end
+        end
     end
-    failurestress(:,4)=ResultSet.details.runout*ones(numsamp,1);
 elseif strcmp(ResultSet.details.protocol,'staircase')
     %staircase method described in early literature - if the sample failes
     %go down a stress level for the next sample and if it survives go up a
@@ -77,8 +85,16 @@ elseif strcmp(ResultSet.details.protocol,'staircase')
             failurestress(k,3)=teststresses;
             teststresses=teststresses+stepsizeabs;
         end
+        failurestress(k,4)=ResultSet.details.runout;
+        
+        if isfield(ResultSet, 'plotq')
+            if ResultSet.plotq==1
+                figure(2)
+                p_SN(failurestress,'newfig',0)
+                drawnow
+            end
+        end
     end
-    failurestress(:,4)=ResultSet.details.runout*ones(numsamp,1);
     
 elseif strcmp(ResultSet.details.protocol,'probit')
     %Probit method described in early literature - a range of stresses
@@ -137,8 +153,16 @@ elseif strcmp(ResultSet.details.protocol,'life')
             failurestress(k,6)=0;
             failurestress(k,3)=startingstress;
         end
+        failurestress(k,4)=ResultSet.details.runout;
+        
+        if isfield(ResultSet, 'plotq')
+            if ResultSet.plotq==1
+                figure(2)
+                p_SN(failurestress,'newfig',0)
+                drawnow
+            end
+        end
     end
-    failurestress(:,4)=ResultSet.details.runout*ones(numsamp,1);
 
 elseif strcmp(ResultSet.details.protocol,'bayes staircase')||strcmp(ResultSet.details.protocol,'bayes staircase flat prior')...
         ||strcmp(ResultSet.details.protocol,'bayes staircase 1/x prior')
@@ -172,8 +196,16 @@ elseif strcmp(ResultSet.details.protocol,'bayes staircase')||strcmp(ResultSet.de
             failurestress(k,6)=0;
             failurestress(k,3)=teststresses;
         end
+        failurestress(k,4)=ResultSet.details.runout;
+        
+        if isfield(ResultSet, 'plotq')
+            if ResultSet.plotq==1
+                figure(2)
+                p_SN(failurestress,'newfig',0)
+                drawnow
+            end
+        end
     end
-    failurestress(:,4)=ResultSet.details.runout*ones(numsamp,1);
 
     close(z)
     [lprior,~,shannon(k+1)]=g_calcprior(failurestress,theta,sigma,lpriorq,lprior);
@@ -197,8 +229,15 @@ elseif strcmp(ResultSet.details.protocol,'bayes step')
         [failurestress(k,1),failurestress(k,2),failurestress(k,3),failurestress(k,5)]=f_testingDAM(TestingSet.details,TestingSet.meanFS(k,:),ResultSet.details);
         failurestress(k,6)=1;
         [newstartstress,beststep,lprior,shannon]=B_STEP_simulate(failurestress,theta,sigma,origstartstress,minstressstep,lprior);
+        failurestress(k,4)=ResultSet.details.runout;
+        if isfield(ResultSet, 'plotq')
+            if ResultSet.plotq==1
+                figure(2)
+                p_SN(failurestress,'newfig',0)
+                drawnow
+            end
+        end
     end
-    failurestress(:,4)=ResultSet.details.runout*ones(numsamp,1);
     [lprior,~,shannon,~]=g_calcprior(failurestress(end,:),theta,sigma,lprior);
     close(z)
 
