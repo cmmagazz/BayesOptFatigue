@@ -167,7 +167,6 @@ elseif strcmp(ResultSet.details.protocol,'life')
 elseif strcmp(ResultSet.details.protocol,'bayes staircase')||strcmp(ResultSet.details.protocol,'bayes staircase flat prior')...
         ||strcmp(ResultSet.details.protocol,'bayes staircase 1/x prior')
    
-   sigma=ResultSet.details.sigma;
    theta=ResultSet.details.theta;
 
     if strcmp(ResultSet.details.protocol,'bayes staircase 1/x prior')
@@ -175,12 +174,14 @@ elseif strcmp(ResultSet.details.protocol,'bayes staircase')||strcmp(ResultSet.de
     elseif strcmp(ResultSet.details.protocol,'bayes staircase flat prior')||strcmp(ResultSet.details.protocol,'bayes staircase')
         lpriorq=2;
     end
-    lprior=g_calcprior([],theta,sigma,lpriorq); %initialise the prior
+    lprior=g_calcprior([],theta,lpriorq); %initialise the prior
     z = waitbar(0);
     shannon=NaN(numsamp,1);
+    ResultSet.raw.lprior=lprior;
     for k=1:numsamp
         waitbar(k/numsamp,z,['Sample number: ' num2str(k),'/',num2str(numsamp)])
-        [teststresses,lprior,shannon(k)]=B_simulate(failurestress,theta,sigma,lpriorq,lprior);
+        teststresses=g_bayesbeststress(ResultSet);
+        
         FSsample=TestingSet.meanFS(k,:); %pick out the sample
         
         %element where life=runout number
@@ -198,27 +199,32 @@ elseif strcmp(ResultSet.details.protocol,'bayes staircase')||strcmp(ResultSet.de
         end
         failurestress(k,4)=ResultSet.details.runout;
         
+        ResultSet.raw.failurestress=failurestress;
+        [lprior,~,shannon(k)]=g_calcprior(ResultSet,[],lprior,lpriorq);
+        ResultSet.raw.lprior=lprior;
         if isfield(ResultSet, 'plotq')
             if ResultSet.plotq==1
                 figure(2)
+                subplot(1,2,1)
                 p_SN(failurestress,'newfig',0)
+                subplot(1,2,2)
+                p_HPD(lprior,'newfig',0)
                 drawnow
             end
         end
     end
 
     close(z)
-    [lprior,~,shannon(k+1)]=g_calcprior(failurestress,theta,sigma,lpriorq,lprior);
+    [lprior,~,shannon(k+1)]=g_calcprior(failurestress,theta,lpriorq,lprior);
     ResultSetraw.shannon=shannon;
     ResultSetraw.lprior=lprior;
 elseif strcmp(ResultSet.details.protocol,'bayes step')
-    sigma=ResultSet.details.sigma;
     theta=ResultSet.details.theta;
 
     minstressstep=ResultSet.details.step.stepsize;
     origstartstress=ResultSet.details.startingstress;
-%     k=0;
-    [newstartstress,beststep,lprior,shannon]=B_STEP_simulate([],theta,sigma,origstartstress,minstressstep);
+
+    [newstartstress,beststep,lprior,shannon]=B_STEP_simulate([],theta,origstartstress,minstressstep);
     z = waitbar(0);
 
     for k=1:numsamp
@@ -228,7 +234,7 @@ elseif strcmp(ResultSet.details.protocol,'bayes step')
         ResultSetraw.shannon(k)=shannon;  
         [failurestress(k,1),failurestress(k,2),failurestress(k,3),failurestress(k,5)]=f_testingDAM(TestingSet.details,TestingSet.meanFS(k,:),ResultSet.details);
         failurestress(k,6)=1;
-        [newstartstress,beststep,lprior,shannon]=B_STEP_simulate(failurestress,theta,sigma,origstartstress,minstressstep,lprior);
+        [newstartstress,beststep,lprior,shannon]=B_STEP_simulate(failurestress,theta,origstartstress,minstressstep,lprior);
         failurestress(k,4)=ResultSet.details.runout;
         if isfield(ResultSet, 'plotq')
             if ResultSet.plotq==1
@@ -238,7 +244,7 @@ elseif strcmp(ResultSet.details.protocol,'bayes step')
             end
         end
     end
-    [lprior,~,shannon,~]=g_calcprior(failurestress(end,:),theta,sigma,lprior);
+    [lprior,~,shannon,~]=g_calcprior(failurestress(end,:),theta,lprior);
     close(z)
 
     ResultSetraw.shannon(k+1)=shannon;

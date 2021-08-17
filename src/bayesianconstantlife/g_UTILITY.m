@@ -1,4 +1,4 @@
-function y= g_UTILITY(stress,theta,sigma,lprior)
+function y= g_UTILITY(stress,ResultSet)
 % Utility function for Gearhart method
 % Conceptually: we want to find a stress where, whether it breaks or fails,
 % it will give us the highest information gain. This is also scaled by how
@@ -6,8 +6,7 @@ function y= g_UTILITY(stress,theta,sigma,lprior)
 %
 % input:
 %   stress: a double to compute the probabilities at
-%   theta: space of theta values allowed, vector
-%   sigma: space of sigma values allowed, vector
+%   theta: space of parameter values allowed, cell array of vector
 %   lprior: prior distribution across the theta/sigma space
 %
 % output:
@@ -18,9 +17,12 @@ function y= g_UTILITY(stress,theta,sigma,lprior)
 %Calculate the joint posterior, and the probability of breaking or not 
 % breaking at this stress. g_calcprior can be used to calculate this with
 % "fake" data. 
+lprior=ResultSet.raw.lprior;
 
-[lpostbreak,xbreak]=g_calcprior([stress,NaN,NaN],theta,sigma,lprior);
-[lpostnotbreak,~,~,xnotbreak]=g_calcprior([NaN,NaN,stress],theta,sigma,lprior);
+ResultSet.raw.failurestress=[stress,NaN,NaN];
+[lpostbreak,xbreak]=g_calcprior(ResultSet,[],lprior);
+ResultSet.raw.failurestress=[NaN,NaN,stress];
+[lpostnotbreak,~,~,xnotbreak]=g_calcprior(ResultSet,[],lprior);
 xnotbreak=1-xnotbreak; %x2surv is the cdf of failing at runoutstress, so 
 %need to flip to make it survive
 

@@ -1,4 +1,4 @@
-function [beststress,beststep,lprior,shannon]=B_STEP_simulate(failurestress,theta,sigma,startingstress,minstressstep,varargin)
+function [beststress,beststep,lprior,shannon]=B_STEP_simulate(failurestress,theta,startingstress,minstressstep,varargin)
 %Take the failuretally of the samples so far (if there are any) and find 
 %the next stress to test. 
 %
@@ -13,9 +13,9 @@ function [beststress,beststep,lprior,shannon]=B_STEP_simulate(failurestress,thet
 %   beststep: the optimal next stress step to test
 %Calculate your prior
 if numel(varargin)==1
-    [lprior,~,shannon]=g_calcprior(failurestress,theta,sigma,varargin{1});
+    [lprior,~,shannon]=g_calcprior(failurestress,theta,varargin{1});
 elseif numel(varargin)==0
-    [lprior,~,shannon]=g_calcprior(failurestress,theta,sigma);
+    [lprior,~,shannon]=g_calcprior(failurestress,theta);
 end
-[beststress,beststep]=g_bayes_beststepsize_stepstart(theta,sigma,lprior,minstressstep,startingstress);
+[beststress,beststep]=g_bayes_beststepsize_stepstart(theta,lprior,minstressstep,startingstress);
 end

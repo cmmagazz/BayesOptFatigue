@@ -22,30 +22,20 @@ TestingSet.details.DAMq=1;%damage model: 1=none, 2=miner's rule
 TestingSet.details.SDistq=[1,2]; 
 
 TestingSet.details.numsamp=20; %number of specimens
-TestingSet.details.width=10; %width in sigma
+TestingSet.details.width=100; %width in sigma
 
 TestingSet.meanFS=f_createsample(TestingSet.details); %create the monte-carlo sample set
+%=============================================
+%Constant life prior constants: determine the space of parameters: 
+% Choose from: 'norm','lognorm','2pwbl','3pwbl'
+% Insert range of parameters, see function for details
+ResultSet.details=f_setupresultsdist([[300, 700];[1, 150]],'norm');
+
 %=============================================
 %ResultSet parameters
 ResultSet.details.startingstress=150; %starting stress in MPa 
 ResultSet.details.runout=6; %set the runout value in log(cycles)
 ResultSet.details.step.stepsize=100; %step size in MPa
-
-%=============================================
-%Constant life prior constants: determine the space of parameters: 
-%   theta = mean fatigue strength
-%   sigma = standard deviation
-maxtheta=700;
-mintheta=300;
-theta=mintheta:2:maxtheta; %from min to max in steps of 2
-
-maxsigma=100;
-minsigma=1;
-sigma=minsigma:2:maxsigma;
-
-%Insert into ResultSet struct
-ResultSet.details.theta=theta;
-ResultSet.details.sigma=sigma;
 %% Simple run
 %Select a protocol from
 %     'stress step'

@@ -1,8 +1,8 @@
-function [beststress,beststep]=g_bayes_beststepsize_stepstart(theta,sigma,lprior,minstressstep,startingstress)
+function [beststress,beststep]=g_bayes_beststepsize_stepstart(theta,lprior,minstressstep,startingstress)
 % Evaluate the next best step size or starting point to test! 
 % This is built using a step utility function as described in the paper 
 % and in g__STEP_UTILITY
-% INPUTS: theta, sigma, log of prior
+% INPUTS: theta, log of prior
 % OUTPUTS: best stress starting point and step size to test in units of theta
 
 startingstresses=startingstress-minstressstep:2:startingstress;
@@ -16,7 +16,7 @@ end
 
 
 %% For variable starting point
-fun=@(x)g_STEP_UTILITY(minstressstep,x,theta,sigma,lprior);
+fun=@(x)g_STEP_UTILITY(minstressstep,x,theta,lprior);
 
 beststep=minstressstep;
 

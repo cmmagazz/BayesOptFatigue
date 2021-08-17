@@ -1,4 +1,4 @@
-function [beststress,lprior,shannon]=B_simulate(failurestress,theta,sigma,lpriorq,lprior)
+function [beststress,lprior,shannon]=B_simulate(failurestress,theta,lpriorq,lprior)
 %Take the failuretally of the samples so far (if there are any) and find 
 %the next stress to test. 
 %
@@ -13,6 +13,6 @@ function [beststress,lprior,shannon]=B_simulate(failurestress,theta,sigma,lprior
 %       lprior: the log of the prior, as an array
 %       shannon: the shannon information (=p*log(p))
 
-[lprior,~,shannon]=g_calcprior(failurestress,theta,sigma,lprior,lpriorq);
-beststress=g_bayesbeststress(theta,sigma,lprior);
+[lprior,~,shannon]=g_calcprior(failurestress,theta,lprior,lpriorq);
+beststress=g_bayesbeststress(theta,lprior);
 end

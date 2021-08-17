@@ -1,4 +1,4 @@
-function [y,secondoutput]= g_STEP_UTILITY(stepsize,startingstress,theta,sigma,lprior)
+function [y,secondoutput]= g_STEP_UTILITY(stepsize,startingstress,theta,lprior)
 % Utility function based on Gearhart method
 % Conceptually: we want to find a stress and stress step where, whether it breaks or fails (at either stress),
 % it will give us the highest information gain. This is also scaled by how
@@ -7,8 +7,7 @@ function [y,secondoutput]= g_STEP_UTILITY(stepsize,startingstress,theta,sigma,lp
 % input:
 %   stepsize: a double 
 %   startingstress: a double
-%   theta: space of theta values allowed, vector
-%   sigma: space of sigma values allowed, vector
+%   theta: space of parameter values allowed, cell array of vectors
 %   lprior: prior distribution across the theta/sigma space
 %
 % output:
@@ -19,10 +18,10 @@ priorinfo=sum(lprior.*exp(lprior),'all');
 minstress=startingstress;
 maxval=f_HPD(squeeze(lprior),1-1e-6);
 [row,col]=find(squeeze(exp(lprior))>=maxval);
-thetarange=theta(row);
-sigmarange=sigma(col);
-maxstress=max(thetarange)+max(sigmarange)+2*stepsize+100;
-minstressT=min(thetarange)-max(sigmarange)-2*stepsize-100;
+murange=theta{1}(row);
+sigmarange=theta{2}(col);
+maxstress=max(murange)+max(sigmarange)+2*stepsize+100;
+minstressT=min(murange)-max(sigmarange)-2*stepsize-100;
 %deal with max and min stresses outside a 'reasonable' range
 if isnan(minstressT)
     warning('error in calculation')
@@ -31,7 +30,7 @@ if minstressT<minstress
     1;
 else
 %     round the min stress values onto the 'grid'
-    minstress=interp1(minstress-100*stepsize:stepsize:max(theta),minstress-100*stepsize:stepsize:max(theta),minstressT,'nearest');
+    minstress=interp1(minstress-100*stepsize:stepsize:max(theta{1}),minstress-100*stepsize:stepsize:max(theta{1}),minstressT,'nearest');
     %we only want to look 
 %     within the 95% HPD of the prior, but since we want to 
 %     controll our pertubation of starting stress about the 'grid' of testing 
@@ -50,13 +49,13 @@ for ids=1:length(stresses)
     %if it runs out, we have no extra information as we can't record this
     %with the step testing protocol
     if ids==1%on the first step, the probability of failure is the integral from zero to the starting stress
-        [~,failnormstcdf,infobreakT,~]=g_calcprior([stresses(ids),NaN,NaN],theta,sigma,lprior);
+        [~,failnormstcdf,infobreakT,~]=g_calcprior([stresses(ids),NaN,NaN],theta,lprior);
         probtotT=squeeze(exp(lprior)).*failnormstcdf;
         probtot(1)=sum(probtotT(:));
     else
 %         probability of oberving is the probability of recording a result
 %         between the stress level and the stress level + step size
-        [~,failnormstcdf,infobreakT,runoutnormstcdf]=g_calcprior([stresses(ids),NaN,stresses(ids)-stepsize],theta,sigma,lprior);
+        [~,failnormstcdf,infobreakT,runoutnormstcdf]=g_calcprior([stresses(ids),NaN,stresses(ids)-stepsize],theta,lprior);
         xtot=failnormstcdf-runoutnormstcdf;
         probtotT=squeeze(exp(lprior)).*xtot;
         probtot(ids)=sum(probtotT(:));

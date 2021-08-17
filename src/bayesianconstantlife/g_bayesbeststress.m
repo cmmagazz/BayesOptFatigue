@@ -1,17 +1,20 @@
-function beststress=g_bayesbeststress(theta,sigma,lprior)
+function beststress=g_bayesbeststress(ResultSet)
 % Evaluate the next best stress to test! This is built using a utility
 % function as described in the paper and in g_UTILITY
 % INPUTS: theta, sigma, log of prior
 % OUTPUTS: best stress to test in units of theta
-fun=@(stress)g_UTILITY(stress,theta,sigma,lprior);
-mintheta=min(theta);
-maxtheta=max(theta);
-rangtheta=maxtheta-mintheta;
+theta=ResultSet.details.theta;
+lprior=ResultSet.raw.lprior;
+
+fun=@(stress)g_UTILITY(stress,ResultSet);
+minmu=min(theta{1});
+maxmu=max(theta{1});
+rangmu=maxmu-minmu;
 
 %% FIRST PASS
 % Coarse run through the range of stresses, and see where the utility
 % function actually has values that matter. 
-stresstolookat=mintheta:30:maxtheta; %COARSE
+stresstolookat=minmu:30:maxmu; %COARSE
 z=stresstolookat;
 for i=1:numel(stresstolookat)
     z(i)=-fun(stresstolookat(i));
@@ -37,7 +40,7 @@ try
 
     opts = optimoptions(@fmincon,'Algorithm','interior-point');
     problem = createOptimProblem('fmincon','objective',...
-        fun,'x0',mintheta+0.5*rangtheta,'lb',mintheta,'ub',maxtheta,'options',opts);
+        fun,'x0',minmu+0.5*rangmu,'lb',minmu,'ub',maxmu,'options',opts);
     ms = MultiStart;
     ms.Display='off';
     tpoints = CustomStartPointSet(culledstresses(seedpoints)');
@@ -45,7 +48,7 @@ try
     [beststress,f] = run(ms,problem,tpoints);
 catch
     %If you do not have createOptimproblem
-    stressestolookat=mintheta:5:maxtheta; %Finer mesh
+    stressestolookat=minmu:5:maxmu; %Finer mesh
 
     z=stressestolookat;
     for i=1:numel(stressestolookat)
@@ -72,10 +75,10 @@ end
         z(i)=-fun(stresstolookat(i));
     end
     % figure();
-    z=z-min(z);%NORMALISE Z FOR CONVENIENCE
-    z=z./max(z);
+%     z=z-min(z);%NORMALISE Z FOR CONVENIENCE
+%     z=z./max(z);
     f=max(z);
-
+    figure(3)
     plot(stresstolookat,z)
     xlabel('Test Stress (MPa)');
     ylabel('Utility Function')

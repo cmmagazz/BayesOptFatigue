@@ -1,4 +1,4 @@
-function [lprior,x2fail,shannon,x2surv,progthet,progsig]=g_calcprior(ResultSetraw,theta,sigma,varargin)
+function [lprior,x2fail,shannon,x2surv,progthet,progsig]=g_calcprior(ResultSet,theta,varargin)
 % Calculate the prior, or joint posterior.
 % Here we initialise, and evaluate the contribution of each sample onto the
 % joint posterior given the results. Assumes constant step size, should
@@ -25,10 +25,13 @@ function [lprior,x2fail,shannon,x2surv,progthet,progsig]=g_calcprior(ResultSetra
 %       progsig: the progressive estimation of the MLE,95%CI of the stdev
 
 %Parse the inputs:
-if isstruct(ResultSetraw)
-    data=ResultSetraw.failurestress(:,:);
+if isstruct(ResultSet)
+    data=ResultSet.raw.failurestress(:,:);
+    theta=ResultSet.details.theta;
+    dist=ResultSet.details.dist;
 else
-    data=ResultSetraw;
+    data=ResultSet;
+    dist='norm';
 end
 if ~isempty(data)
     idS=isnan(data(:,1)) & isnan(data(:,3));
@@ -49,17 +52,19 @@ elseif numel(varargin)==1
         lprior=varargin{1};
     end
 end
+
+
 if ~exist('lprior','var') %if you are not given a prior:do the old method where you reupdate
     if ~exist('lpriorq','var')%set deafult to what we have always done
         lpriorq=2;
     end
     if lpriorq==1
-        psigma=1./(sigma);
+        psigma=1./(theta{2});
         psigma=psigma./sum(psigma);
-        ptheta=ones(size(theta))./length(theta);
-        lprior=log(psigma.*ptheta');
+        pmu=ones(size(theta{1}))./length(theta{1});
+        lprior=log(psigma.*pmu');
     elseif lpriorq==2
-        lprior=ones(length(theta),length(sigma));
+        lprior=ones(length(theta{1}),length(theta{2}));
     end
 
     norm=sum(sum(exp(lprior)));
@@ -67,122 +72,105 @@ if ~exist('lprior','var') %if you are not given a prior:do the old method where 
     shannon=sum(lprior.*exp(lprior),'all');
     x2fail=[];
     x2surv=[];
+else
     if ~isempty(data)
-        failstress=data(:,1);
-        runoutstress=data(:,3);
-        %Now create a prior which, if the sample passed, then you have informaiton
-        %on the passing cdf (decreases with increased stress), and vice versa for
-        %failure. If the probability of this is 1 or 0, set the prior to a
-        %very small number
-        %run through all the data
-        shannonT=shannon;
-        shannon = NaN(1,numel(failstress));
-        shannon(1)=shannonT;
-        progthet=NaN(numel(failstress),3);
-        progsig=NaN(numel(failstress),3);
-        for i=1:numel(failstress)
-            if ~isnan(failstress(i))&&~isnan(runoutstress(i))%usual case when we have a failure and runout
-                x2fail=normcdf(failstress(i),repmat(theta',[1,size(sigma,2)]),repmat(sigma,[size(theta,2),1]));
-                x2surv=normcdf(runoutstress(i),repmat(theta',[1,size(sigma,2)]),repmat(sigma,[size(theta,2),1]));
-                x2=x2fail-x2surv;%the probability of getting sample data in the range is the integral of the 
-            elseif isnan(runoutstress(i)) %if we failed on the first step
-                x2fail=normcdf(failstress(i),repmat(theta',[1,size(sigma,2)]),repmat(sigma,[size(theta,2),1]));
-                x2=x2fail;
-            elseif isnan(failstress(i)) %if we reached the limit of testing stresses and did not fail 
-                x2surv=normcdf(runoutstress(i),repmat(theta',[1,size(sigma,2)]),repmat(sigma,[size(theta,2),1]));
-                x2=1-x2surv;
-            end
-            %PDF of collection probability over the range. This is equivelant to the difference between 
-            %the values of the cdfover that range
-            whereuseful=x2>0;
-            lprior(whereuseful)=log(x2(whereuseful))+lprior(whereuseful);
-            lprior(~whereuseful)=-1e7;
-            
-            norm=sum(exp(lprior(:)));
-            lprior=lprior-ones(size(lprior)).*log(norm);
-            shannon(i+1)=sum(lprior.*exp(lprior),'all');
-            
-            %DEBUG
-            %{
-            figure(2)
-            subplot(2,1,1)
-            h=pcolor(sigma,theta,x2);
-            set(h, 'EdgeColor', 'none');
-            colormap(parula)
-            xlabel('\sigma')
-            ylabel('\theta')
-            title('X2')
-            subplot(2,1,2)
-            h=pcolor(sigma,theta,exp(lprior));
-            set(h, 'EdgeColor', 'none');
-            colormap(parula)
-            xlabel('\sigma')
-            ylabel('\theta')
-            xlim([0,80])
-            ylim([300,500])
-            title('lprior')
-            sgtitle('g calcprior')
-            pause(0.5)
-            %}
-            
-            %Given the full dataset, can also output the progressive
-            %estimation of the MLE and 95% confidence interval as it
-            %evaluates
-            CI=0.95;
-            maxval=f_HPD(lprior,CI);
-            idmin=exp(lprior)>=maxval;
-            [row,col]=find(idmin);
-            %find the maximum extent, in theta and sigma independantly,
-            %that this draws
-            %save the data:
-            progthet(i,2)=max(theta(row));
-            progthet(i,3)=min(theta(row));
-            progsig(i,2)=max(sigma(col));
-            progsig(i,3)=min(sigma(col));
-            %find the theta and sigma with the highest value in lprior
-            maxval=max(exp(lprior(:))); %<<<<<<<<< CMM EDIT FROM 17/06/21 this is right!
-            idmin=exp(lprior)==maxval;
-            [row,col]=find(idmin);
-            if nnz(row)>0
-                progthet(i,1)=mean(theta(row));
-                progsig(i,1)=mean(sigma(col));
-            end
-            
-        end
-        norm=sum(exp(lprior(:)));
-        lprior=lprior-ones(size(lprior)).*log(norm);
+        data=data(end,:);
     end
+end
     
-else %otherwise, if given a prior, then it must be already with the data
-    %from the previous tests. so, just take the last one
-    shannon(1)=sum(lprior.*exp(lprior),'all');
-    x2fail=[];
-    x2surv=[];
-    if ~isempty(data)
-        failstress=data(end,1);
-        runoutstress=data(end,3);
-        if ~isnan(failstress)&&~isnan(runoutstress)%usual case when we have a failure and runout
-            x2fail=normcdf(failstress,repmat(theta',[1,size(sigma,2)]),repmat(sigma,[size(theta,2),1]));
-            x2surv=normcdf(runoutstress,repmat(theta',[1,size(sigma,2)]),repmat(sigma,[size(theta,2),1]));
+if ~isempty(data)
+    failstress=data(:,1);
+    runoutstress=data(:,3);
+    %Now create a prior which, if the sample passed, then you have informaiton
+    %on the passing cdf (decreases with increased stress), and vice versa for
+    %failure. If the probability of this is 1 or 0, set the prior to a
+    %very small number
+    %run through all the data
+
+    shannon = NaN(1,numel(failstress));
+
+    progthet=NaN(numel(failstress),3);
+    progsig=NaN(numel(failstress),3);
+    for i=1:numel(failstress)
+        if ~isnan(failstress(i))&&~isnan(runoutstress(i))%usual case when we have a failure and runout
+            x2fail=g_calcprobCDF(failstress(i),theta,dist);
+            x2surv=g_calcprobCDF(runoutstress(i),theta,dist);
             x2=x2fail-x2surv;%the probability of getting sample data in the range is the integral of the 
-        elseif isnan(runoutstress) %if we failed on the first step
-            x2fail=normcdf(failstress,repmat(theta',[1,size(sigma,2)]),repmat(sigma,[size(theta,2),1]));
+        elseif isnan(runoutstress(i)) %if we failed on the first step
+            x2fail=g_calcprobCDF(failstress(i),theta,dist);
             x2=x2fail;
-        elseif isnan(failstress) %if we reached the limit of testing stresses and did not fail 
-            x2surv=normcdf(runoutstress,repmat(theta',[1,size(sigma,2)]),repmat(sigma,[size(theta,2),1]));
+            x2surv=[];
+        elseif isnan(failstress(i)) %if we reached the limit of testing stresses and did not fail 
+            x2surv=g_calcprobCDF(runoutstress(i),theta,dist);
             x2=1-x2surv;
+            x2fail=[];
         end
         %PDF of collection probability over the range. This is equivelant to the difference between 
         %the values of the cdfover that range
         whereuseful=x2>0;
         lprior(whereuseful)=log(x2(whereuseful))+lprior(whereuseful);
         lprior(~whereuseful)=-1e7;
-        norm=sum(sum(exp(lprior)));
+
+        norm=sum(exp(lprior(:)));
         lprior=lprior-ones(size(lprior)).*log(norm);
-        shannon(2)=sum(lprior.*exp(lprior),'all');
+        shannon(i)=sum(lprior.*exp(lprior),'all');
+
+        %DEBUG
+        %{
+        figure(2)
+        subplot(2,1,1)
+        h=pcolor(theta{2},theta{1},x2);
+        set(h, 'EdgeColor', 'none');
+        colormap(parula)
+        xlabel('\sigma')
+        ylabel('\theta')
+        title('X2')
+        subplot(2,1,2)
+        h=pcolor(theta{2},theta{1},exp(lprior));
+        set(h, 'EdgeColor', 'none');
+        colormap(parula)
+        xlabel('\sigma')
+        ylabel('\theta')
+        xlim([0,80])
+        ylim([300,500])
+        title('lprior')
+        sgtitle('g calcprior')
+        pause(0.5)
+        %}
+
+        %Given the full dataset, can also output the progressive
+        %estimation of the MLE and 95% confidence interval as it
+        %evaluates
+        CI=0.95;
+        maxval=f_HPD(lprior,CI);
+        idmin=exp(lprior)>=maxval;
+        [row,col]=find(idmin);
+        %find the maximum extent, in theta and sigma independantly,
+        %that this draws
+        %save the data:
+        progthet(i,2)=max(theta{1}(row));
+        progthet(i,3)=min(theta{1}(row));
+        progsig(i,2)=max(theta{2}(col));
+        progsig(i,3)=min(theta{2}(col));
+        %find the theta and sigma with the highest value in lprior
+        maxval=max(exp(lprior(:))); %<<<<<<<<< CMM EDIT FROM 17/06/21 this is right!
+        idmin=exp(lprior)==maxval;
+        [row,col]=find(idmin);
+        if nnz(row)>0
+            progthet(i,1)=mean(theta{1}(row));
+            progsig(i,1)=mean(theta{2}(col));
+        end
+
     end
-    shannon=shannon(end);
+    norm=sum(exp(lprior(:)));
+    lprior=lprior-ones(size(lprior)).*log(norm);
+else
+    x2fail=[];
+    x2surv=[];
+    progthet=[];
+    progsig=[];
 end
+    
 norm=sum(sum(exp(lprior))); %Sanity: normalise at the end as well
 lprior=lprior-ones(size(lprior)).*log(norm);
 if nnz(isnan(lprior))>0 

@@ -27,17 +27,17 @@ function p_HPD(arraytoplot,varargin)
 % CMM 2020
 
 try
-    defaultx=evalin('base','sigma');
-    defaulty=evalin('base','theta');
+    theta=evalin('base','theta');
 catch
     try
-        defaultx=evalin('base','ResultSet.details.sigma');
-        defaulty=evalin('base','ResultSet.details.theta');
+        theta=evalin('base','ResultSet.details.theta');
     catch
-        defaultx=evalin('caller','sigma');
-        defaulty=evalin('caller','theta');
+        theta=evalin('caller','theta');
     end
 end
+defaultx=theta{2};
+defaulty=theta{1};
+
 defaultCI=0.95;
 defaultnewfig=1;
 
