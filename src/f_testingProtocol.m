@@ -1,4 +1,4 @@
-function [ResultSetraw]=f_testingProtocol(TestingSet,ResultSet)
+function [ResultSet]=f_testingProtocol(TestingSet,ResultSet)
 %Take the testing set data and perform the desired protocol to it and
 %save the results back into result set. Each protocol is a different
 %way of testing the previousley generated sample SN curves and following the stress
@@ -176,7 +176,7 @@ elseif strcmp(ResultSet.details.protocol,'bayes staircase')||strcmp(ResultSet.de
     end
     lprior=g_calcprior([],theta,lpriorq); %initialise the prior
     z = waitbar(0);
-    shannon=NaN(numsamp,1);
+    shannon=NaN(numsamp+1,1);
     ResultSet.raw.lprior=lprior;
     for k=1:numsamp
         waitbar(k/numsamp,z,['Sample number: ' num2str(k),'/',num2str(numsamp)])
@@ -216,26 +216,33 @@ elseif strcmp(ResultSet.details.protocol,'bayes staircase')||strcmp(ResultSet.de
 
     close(z)
     [lprior,~,shannon(k+1)]=g_calcprior(failurestress,theta,lpriorq,lprior);
-    ResultSetraw.shannon=shannon;
-    ResultSetraw.lprior=lprior;
+    ResultSet.raw.shannon=shannon;
+    ResultSet.raw.lprior=lprior;
 elseif strcmp(ResultSet.details.protocol,'bayes step')
-    theta=ResultSet.details.theta;
 
-    minstressstep=ResultSet.details.step.stepsize;
-    origstartstress=ResultSet.details.startingstress;
+    origstartingstress=ResultSet.details.startingstress;
+    ResultSet.raw.shannon=NaN(numsamp+1,1);
+    [ResultSet.raw.lprior,~,ResultSet.raw.shannon(1)]=g_calcprior([],ResultSet.details.theta); %initialise the prior
 
-    [newstartstress,beststep,lprior,shannon]=B_STEP_simulate([],theta,origstartstress,minstressstep);
     z = waitbar(0);
 
     for k=1:numsamp
         waitbar(k/numsamp,z,['Sample number: ' num2str(k),'/',num2str(numsamp)])
+
+        [failurestress(k,1),failurestress(k,2),failurestress(k,3),failurestress(k,5)]=f_testingDAM(TestingSet.details,TestingSet.meanFS(k,:),ResultSet.details);
+        failurestress(k,4)=ResultSet.details.runout;
+        failurestress(k,6)=1;
+        
+        ResultSet.details.startingstress=origstartingstress;
+        
+        ResultSet.raw.failurestress=failurestress;
+        [ResultSet.raw.lprior,~,ResultSet.raw.shannon(k+1)]=g_calcprior(ResultSet,[],ResultSet.raw.lprior);
+        
+        [newstartstress,beststep]=g_bayes_beststepsize_stepstart(ResultSet);
         ResultSet.details.startingstress=newstartstress;
         ResultSet.details.step.stepsize=beststep;
-        ResultSetraw.shannon(k)=shannon;  
-        [failurestress(k,1),failurestress(k,2),failurestress(k,3),failurestress(k,5)]=f_testingDAM(TestingSet.details,TestingSet.meanFS(k,:),ResultSet.details);
-        failurestress(k,6)=1;
-        [newstartstress,beststep,lprior,shannon]=B_STEP_simulate(failurestress,theta,origstartstress,minstressstep,lprior);
-        failurestress(k,4)=ResultSet.details.runout;
+
+        
         if isfield(ResultSet, 'plotq')
             if ResultSet.plotq==1
                 figure(2)
@@ -244,12 +251,10 @@ elseif strcmp(ResultSet.details.protocol,'bayes step')
             end
         end
     end
-    [lprior,~,shannon,~]=g_calcprior(failurestress(end,:),theta,lprior);
+    
     close(z)
 
-    ResultSetraw.shannon(k+1)=shannon;
-    ResultSetraw.lprior=lprior;
 end
 % Save to results
-ResultSetraw.failurestress=failurestress;
+ResultSet.raw.failurestress=failurestress;
 end

@@ -30,17 +30,17 @@ xnotbreak=1-xnotbreak; %x2surv is the cdf of failing at runoutstress, so
 probbreak=exp(lprior).*xbreak;
 probnotbreak=exp(lprior).*xnotbreak;
 %integrate
-probbreak=sum(sum(probbreak));
-probnotbreak=sum(sum(probnotbreak));
+probbreak=sum(probbreak,'all');
+probnotbreak=sum(probnotbreak,'all');
 
 %normalise the posterior, and finally the integral across the prior:
-normbreak=sum(sum(exp(lpostbreak)));
+normbreak=sum(exp(lpostbreak),'all');
 lpostbreak=lpostbreak-ones(size(lprior)).*log(normbreak);
-normnotbreak=sum(sum(exp(lpostnotbreak)));
+normnotbreak=sum(exp(lpostnotbreak),'all');
 lpostnotbreak=lpostnotbreak-ones(size(lprior)).*log(normnotbreak);
 %information is p*logp
-infobreak=sum(sum(lpostbreak.*exp(lpostbreak)));
-infonotbreak=sum(sum(lpostnotbreak.*exp(lpostnotbreak)));
+infobreak=sum(lpostbreak.*exp(lpostbreak),'all');
+infonotbreak=sum(lpostnotbreak.*exp(lpostnotbreak),'all');
 %output: negative for original convenience of finding the minimum of y
 %(which is the maximum of utility)
 y=-(probbreak*infobreak+probnotbreak*infonotbreak);

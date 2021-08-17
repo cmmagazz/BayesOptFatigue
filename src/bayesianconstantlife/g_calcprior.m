@@ -64,7 +64,11 @@ if ~exist('lprior','var') %if you are not given a prior:do the old method where 
         pmu=ones(size(theta{1}))./length(theta{1});
         lprior=log(psigma.*pmu');
     elseif lpriorq==2
-        lprior=ones(length(theta{1}),length(theta{2}));
+        if numel(theta)==2
+            lprior=ones(length(theta{1}),length(theta{2}));
+        elseif numel(theta)==3
+            lprior=ones(length(theta{1}),length(theta{2}),length(theta{3}));
+        end
     end
 
     norm=sum(sum(exp(lprior)));
@@ -91,6 +95,7 @@ if ~isempty(data)
 
     progthet=NaN(numel(failstress),3);
     progsig=NaN(numel(failstress),3);
+    progC=NaN(numel(failstress),3);
     for i=1:numel(failstress)
         if ~isnan(failstress(i))&&~isnan(runoutstress(i))%usual case when we have a failure and runout
             x2fail=g_calcprobCDF(failstress(i),theta,dist);
@@ -111,7 +116,7 @@ if ~isempty(data)
         lprior(whereuseful)=log(x2(whereuseful))+lprior(whereuseful);
         lprior(~whereuseful)=-1e7;
 
-        norm=sum(exp(lprior(:)));
+        norm=sum(exp(lprior),'all');
         lprior=lprior-ones(size(lprior)).*log(norm);
         shannon(i)=sum(lprior.*exp(lprior),'all');
 
@@ -144,25 +149,51 @@ if ~isempty(data)
         CI=0.95;
         maxval=f_HPD(lprior,CI);
         idmin=exp(lprior)>=maxval;
-        [row,col]=find(idmin);
-        %find the maximum extent, in theta and sigma independantly,
+                %find the maximum extent, in theta and sigma independantly,
         %that this draws
         %save the data:
-        progthet(i,2)=max(theta{1}(row));
-        progthet(i,3)=min(theta{1}(row));
-        progsig(i,2)=max(theta{2}(col));
-        progsig(i,3)=min(theta{2}(col));
-        %find the theta and sigma with the highest value in lprior
-        maxval=max(exp(lprior(:))); %<<<<<<<<< CMM EDIT FROM 17/06/21 this is right!
-        idmin=exp(lprior)==maxval;
-        [row,col]=find(idmin);
-        if nnz(row)>0
-            progthet(i,1)=mean(theta{1}(row));
-            progsig(i,1)=mean(theta{2}(col));
+        if ndims(idmin)==2
+            [row,col]=find(idmin);
+
+            progthet(i,2)=max(theta{1}(row));
+            progthet(i,3)=min(theta{1}(row));
+            progsig(i,2)=max(theta{2}(col));
+            progsig(i,3)=min(theta{2}(col));
+                    %find the theta and sigma with the highest value in lprior
+            maxval=max(exp(lprior(:))); %<<<<<<<<< CMM EDIT FROM 17/06/21 this is right!
+            idmin=exp(lprior)==maxval;
+            [row,col]=find(idmin);
+            if nnz(row)>0
+                progthet(i,1)=mean(theta{1}(row));
+                progsig(i,1)=mean(theta{2}(col));
+            end
+        elseif ndims(idmin)==3
+            I=find(idmin);
+            [row,col,depth]=ind2sub(size(idmin),I);
+            progthet(i,2)=max(theta{1}(row));
+            progthet(i,3)=min(theta{1}(row));
+            progsig(i,2)=max(theta{2}(col));
+            progsig(i,3)=min(theta{2}(col));
+            progC(i,2)=max(theta{3}(depth));
+            progC(i,3)=min(theta{3}(depth));
+                    %find the theta and sigma with the highest value in lprior
+            maxval=max(exp(lprior(:))); %<<<<<<<<< CMM EDIT FROM 17/06/21 this is right!
+            idmin=exp(lprior)==maxval;
+            
+            I=find(idmin);
+            [row,col,depth]=ind2sub(size(idmin),I);
+
+            if nnz(row)>0
+                progthet(i,1)=mean(theta{1}(row));
+                progsig(i,1)=mean(theta{2}(col));
+                progC(i,3)=mean(theta{3}(depth));
+            end
         end
 
+
+
     end
-    norm=sum(exp(lprior(:)));
+    norm=sum(exp(lprior),'all');
     lprior=lprior-ones(size(lprior)).*log(norm);
 else
     x2fail=[];
@@ -171,7 +202,7 @@ else
     progsig=[];
 end
     
-norm=sum(sum(exp(lprior))); %Sanity: normalise at the end as well
+norm=sum(exp(lprior),'all'); %Sanity: normalise at the end as well
 lprior=lprior-ones(size(lprior)).*log(norm);
 if nnz(isnan(lprior))>0 
     1;

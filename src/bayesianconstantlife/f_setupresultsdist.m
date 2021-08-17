@@ -1,10 +1,12 @@
-function ResultSetdetails=f_setupresultsdist(ranges,dist)
+function ResultSetdetails=f_setupresultsdist(ranges,dist,NUMEL)
 %Function to setup the cell of vectors of model parameter values
 %   For Normal:
 %       dist='norm';
 %       mu = mean fatigue strength
 %       sigma = standard deviation
 %   For 2-param Weibull: 
+
+
 if strcmp(dist,'norm') || isempty(dist)
     needsize=[2,2];
     if nnz(size(ranges)~=needsize)>0
@@ -12,11 +14,11 @@ if strcmp(dist,'norm') || isempty(dist)
     end
     minmu=ranges(1,1);
     maxmu=ranges(1,2);
-    mu=minmu:2:maxmu; %from min to max in steps of 2
+    mu=linspace(minmu,maxmu,NUMEL);%from min to max in steps of
 
     minsigma=ranges(2,1);
     maxsigma=ranges(2,2);
-    sigma=minsigma:2:maxsigma;
+    sigma=linspace(minsigma,maxsigma,NUMEL);
 
     %Insert into ResultSet struct
     ResultSetdetails.theta={mu, sigma};
@@ -29,11 +31,12 @@ elseif strcmp(dist,'lognorm')
     end
     minmu=ranges(1,1);
     maxmu=ranges(1,2);
-    mu=minmu:2:maxmu; %from min to max in steps of 2
+    mu=linspace(minmu,maxmu,NUMEL);
+%     mu=minmu:2:maxmu; %from min to max in steps of 2
 
     minsigma=ranges(2,1);
     maxsigma=ranges(2,2);
-    sigma=minsigma:2:maxsigma;
+    sigma=linspace(minsigma,maxsigma,NUMEL);
 
     %Insert into ResultSet struct
     ResultSetdetails.theta={mu, sigma};
@@ -46,11 +49,11 @@ elseif strcmp(dist,'2pwbl')
     end
     minA=ranges(1,1);
     maxA=ranges(1,2);
-    A=minA:2:maxA; %from min to max in steps of 2
+    A=linspace(minA,maxA,NUMEL); %from min to max in steps of 2
 
     minB=ranges(2,1);
     maxB=ranges(2,2);
-    B=minB:2:maxB;
+    B=linspace(minB,maxB,NUMEL);
 
     %Insert into ResultSet struct
     ResultSetdetails.theta={A, B};
@@ -63,15 +66,15 @@ elseif strcmp(dist,'3pwbl')
     end
     minA=ranges(1,1);
     maxA=ranges(1,2);
-    A=minA:2:maxA; %from min to max in steps of 2
+    A=linspace(minA,maxA,NUMEL); %
 
     minB=ranges(2,1);
     maxB=ranges(2,2);
-    B=minB:2:maxB;    
+    B=linspace(minB,maxB,NUMEL);    
     
     minC=ranges(3,1);
     maxC=ranges(3,2);
-    C=minC:2:maxC;
+    C=linspace(minC,maxC,NUMEL);
 
     %Insert into ResultSet struct
     ResultSetdetails.theta={A, B, C};

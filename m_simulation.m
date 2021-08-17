@@ -8,6 +8,7 @@
 %=============================================
 clear all
 close all
+clc
 %=============================================
 %Testing Set parameters and setup
 TestingSet.details.basquin.c=350;
@@ -21,15 +22,19 @@ TestingSet.details.DAMq=1;%damage model: 1=none, 2=miner's rule
 %       optional second: mean model: 1=basquin (default), 2=bi-linear
 TestingSet.details.SDistq=[1,2]; 
 
-TestingSet.details.numsamp=20; %number of specimens
-TestingSet.details.width=100; %width in sigma
+TestingSet.details.numsamp=100; %number of specimens
+TestingSet.details.width=20; %width in sigma
 
 TestingSet.meanFS=f_createsample(TestingSet.details); %create the monte-carlo sample set
 %=============================================
 %Constant life prior constants: determine the space of parameters: 
-% Choose from: 'norm','lognorm','2pwbl','3pwbl'
 % Insert range of parameters, see function for details
-ResultSet.details=f_setupresultsdist([[300, 700];[1, 150]],'norm');
+% Choose from: 'norm','lognorm','2pwbl','3pwbl'
+% Choose numel 
+% ResultSet.details=f_setupresultsdist([[300, 700];[1, 150]],'norm',150);
+% ResultSet.details=f_setupresultsdist([[300, 700];[1, 150]./150],'lognorm',150);
+% ResultSet.details=f_setupresultsdist([[300, 700];[1, 150]],'2pwbl',150);
+ResultSet.details=f_setupresultsdist([[300, 700];[1, 150];[0,300]],'3pwbl',50);
 
 %=============================================
 %ResultSet parameters
@@ -44,12 +49,13 @@ ResultSet.details.step.stepsize=100; %step size in MPa
 %     'life'
 %     'bayes staircase'
 %     'bayes step'
+clc
 close all
-ResultSet.details.protocol = 'bayes staircase';
+ResultSet.details.protocol = 'bayes step';
 %Plot a diagnostic SN curve during collection? 1=yes, 0=no
-ResultSet.plotq=1;
+ResultSet.plotq=0;
 %Run the simulated test
-ResultSet.raw=f_testingProtocol(TestingSet,ResultSet);
+ResultSet=f_testingProtocol(TestingSet,ResultSet);
 
 %% Plotting scripts: to be run line by line if desired
 %Shannon information only available for bayesian protocols ** see below
@@ -71,3 +77,10 @@ p_HPD(ResultSet.raw.lprior)
 [lprior,~,shannon]=g_calcprior(ResultSet.raw.failurestress,ResultSet.details.theta,ResultSet.details.sigma);
 p_HPD(lprior)
 
+%% Run through 3d prior
+for i=1:size(ResultSet.raw.lprior,3)
+    pcolor(exp(squeeze(ResultSet.raw.lprior(:,:,i))));
+    pause(0.1)
+    colorbar
+    hold on
+end

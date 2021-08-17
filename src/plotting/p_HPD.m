@@ -58,7 +58,12 @@ addOptional(p,'resultsfilename',defaultfilename,@ischar);
 addOptional(p,'savefigq',defaultsavefigq,@isnumeric);
 
 parse(p,arraytoplot,varargin{:});
-
+if ndims(arraytoplot)>2
+   arraytoplot=sum(arraytoplot,3);
+%    array2=sum(arraytoplot,2);
+   
+end
+    
 if p.Results.newfig==1
     figure()
 end
