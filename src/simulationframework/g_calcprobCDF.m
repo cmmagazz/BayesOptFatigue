@@ -15,6 +15,15 @@ elseif strcmp(dist,'3pwbl')
     C=permute(C,[2,1,3]);
     threepwblcdf = @(x,a,b,c) (x>c).*(1-exp(-((x-c)./a).^b));
     prob=threepwblcdf(stress,A,B,C);
+elseif strcmp(dist,'gev')
+    [A,B,C]=meshgrid(theta{1},theta{2},theta{3});
+    A=permute(A,[2,1,3]);
+    B=permute(B,[2,1,3]);
+    C=permute(C,[2,1,3]);
+    prob = gevcdf(stress,C,B,A);
+elseif strcmp(dist,'type1')
+    [A,B]=meshgrid(theta{1},theta{2});
+    prob = gevcdf(stress,zeros(size(A')),B',A');
 end
 
 end

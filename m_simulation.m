@@ -40,7 +40,7 @@ ResultSet.details=f_setupresultsdist([[300, 700];[1, 150];[0,300]],'3pwbl',50);
 %ResultSet parameters
 ResultSet.details.startingstress=150; %starting stress in MPa 
 ResultSet.details.runout=6; %set the runout value in log(cycles)
-ResultSet.details.step.stepsize=100; %step size in MPa
+ResultSet.details.step.stepsize=10; %step size in MPa
 %% Simple run
 %Select a protocol from
 %     'stress step'
@@ -51,7 +51,7 @@ ResultSet.details.step.stepsize=100; %step size in MPa
 %     'bayes step'
 clc
 close all
-ResultSet.details.protocol = 'bayes step';
+ResultSet.details.protocol = 'stress step';
 %Plot a diagnostic SN curve during collection? 1=yes, 0=no
 ResultSet.plotq=0;
 %Run the simulated test
@@ -77,6 +77,9 @@ p_HPD(ResultSet.raw.lprior)
 [lprior,~,shannon]=g_calcprior(ResultSet.raw.failurestress,ResultSet.details.theta,ResultSet.details.sigma);
 p_HPD(lprior)
 
+%% Calculate BIC
+close all
+[aic,bic]=g_calcaic(ResultSet.raw,1);
 %% Run through 3d prior
 for i=1:size(ResultSet.raw.lprior,3)
     pcolor(exp(squeeze(ResultSet.raw.lprior(:,:,i))));

@@ -1,4 +1,4 @@
-function [normloglike,wblloglike,lognloglike,maxnormloglike,maxwblloglike,maxlognloglike]=g_calcloglike(ResultSetraw,theta,sigma,wblconst,lognconst)
+function [loglike,maxloglike]=g_calcloglike(ResultSetraw,theta,distnames,NUMEL)
 %Calculate the loglikelihood surfaces for normal, log normal, and weibull
 %distributions given the data
 
@@ -18,7 +18,8 @@ if ~isempty(data)
     data(idS,:)=[];
     %data=f_stripexcessrunouts(data);
 end
-
+loglike=cell(length(distnames),1);
+maxloglike=loglike;
 if ~isempty(data)
     failstress=data(:,1);
     runoutstress=data(:,3);
@@ -31,68 +32,32 @@ if ~isempty(data)
     %failure. If the probability of this is 1 or 0, set the prior to -100;
     %run through all the data
     for i=1:numel(failstress)
-        if ~isnan(failstress(i))&&~isnan(runoutstress(i))%usual case when we have a failure and runout
-            normx2fail=normcdf(failstress(i),repmat(theta',[1,size(sigma,2)]),repmat(sigma,[size(theta,2),1]));
-            normx2surv=normcdf(runoutstress(i),repmat(theta',[1,size(sigma,2)]),repmat(sigma,[size(theta,2),1]));
-            normx2=normx2fail-normx2surv;%the probability of getting sample data in the range is the integral of the
-            
-            wblx2fail=wblcdf(failstress(i),repmat(theta',[1,size(sigma,2)]),repmat(sigma./wblconst,[size(theta,2),1]));
-            wblx2surv=wblcdf(runoutstress(i),repmat(theta',[1,size(sigma,2)]),repmat(sigma./wblconst,[size(theta,2),1]));
-            wblx2=wblx2fail-wblx2surv;%the probability of getting sample data in the range is the integral of the
-            
-            lognx2fail=logncdf(failstress(i),repmat(log(theta)',[1,size(sigma,2)]),repmat(sigma./lognconst,[size(theta,2),1]));
-            lognx2surv=logncdf(runoutstress(i),repmat(log(theta)',[1,size(sigma,2)]),repmat(sigma./lognconst,[size(theta,2),1]));
-            lognx2=lognx2fail-lognx2surv;%the probability of getting sample data in the range is the integral of the
-        elseif isnan(runoutstress(i)) %if we failed on the first step
-            normx2fail=normcdf(failstress(i),repmat(theta',[1,size(sigma,2)]),repmat(sigma,[size(theta,2),1]));
-            normx2=normx2fail;
-            
-            wblx2fail=wblcdf(failstress(i),repmat(theta',[1,size(sigma,2)]),repmat(sigma./wblconst,[size(theta,2),1]));
-            wblx2=wblx2fail;
-            
-            lognx2fail=logncdf(failstress(i),repmat(log(theta)',[1,size(sigma,2)]),repmat(sigma./lognconst,[size(theta,2),1]));
-            lognx2=lognx2fail;
-        elseif isnan(failstress(i)) %if we reached the limit of testing stresses and did not fail [should not ever happen!]
-            normx2surv=normcdf(runoutstress(i),repmat(theta',[1,size(sigma,2)]),repmat(sigma,[size(theta,2),1]));
-            normx2=1-normx2surv;
-            
-            wblx2surv=wblcdf(runoutstress(i),repmat(theta',[1,size(sigma,2)]),repmat(sigma./wblconst,[size(theta,2),1]));
-            wblx2=1-wblx2surv;
-            
-            lognx2surv=logncdf(runoutstress(i),repmat(log(theta)',[1,size(sigma,2)]),repmat(sigma./lognconst,[size(theta,2),1]));
-            lognx2=1-lognx2surv;
+        for distid=1:length(distnames)
+            dist=distnames{distid};
+            ResultSet.details=f_setupresultsdist(theta{distid},dist,NUMEL(distid));
+            if ~isnan(failstress(i))&&~isnan(runoutstress(i))%usual case when we have a failure and runout
+                x2fail=g_calcprobCDF(failstress(i),ResultSet.details.theta,dist);
+                x2surv=g_calcprobCDF(runoutstress(i),ResultSet.details.theta,dist);
+                x2=x2fail-x2surv;%the probability of getting sample data in the range is the integral of the
+            elseif isnan(runoutstress(i)) %if we failed on the first step
+                x2fail=g_calcprobCDF(failstress(i),ResultSet.details.theta,dist);
+                x2=x2fail;
+            elseif isnan(failstress(i)) %if we reached the limit of testing stresses and did not fail [should not ever happen!]
+                x2surv=g_calcprobCDF(runoutstress(i),ResultSet.details.theta,dist);
+                x2=1-x2surv;
+            end
+            %PDF of collection probability over the range. This is equivelant to the difference between 
+            %the values of the cdfover that range
+            whereuseful=x2>0;
+            if i==1
+                loglike{distid}=NaN(size(x2));
+                loglike{distid}(whereuseful)=log(x2(whereuseful));
+            else
+                loglike{distid}(whereuseful)=log(x2(whereuseful))+loglike{distid}(whereuseful);
+            end
+            loglike{distid}(~whereuseful)=-1e7;
+            maxloglike{distid}(i)=max(loglike{distid}(:));
         end
-        %PDF of collection probability over the range. This is equivelant to the difference between 
-        %the values of the cdfover that range
-        normwhereuseful=normx2>0;
-        
-        wblwhereuseful=wblx2>0;
-        
-        lognwhereuseful=lognx2>0;
-        if i==1
-            normloglike=NaN(size(normx2));
-            normloglike(normwhereuseful)=log(normx2(normwhereuseful));
-            
-            wblloglike=NaN(size(normx2));
-            wblloglike(wblwhereuseful)=log(wblx2(wblwhereuseful));
-            
-            lognloglike=NaN(size(normx2));
-            lognloglike(lognwhereuseful)=log(lognx2(lognwhereuseful));
-        else
-            normloglike(normwhereuseful)=log(normx2(normwhereuseful))+normloglike(normwhereuseful);
-            
-            wblloglike(wblwhereuseful)=log(wblx2(wblwhereuseful))+wblloglike(wblwhereuseful);
-            
-            lognloglike(lognwhereuseful)=log(lognx2(lognwhereuseful))+lognloglike(lognwhereuseful);
-        end
-        normloglike(~normwhereuseful)=-1e7;
-        maxnormloglike(i)=max(normloglike(:));
-        
-        wblloglike(~wblwhereuseful)=-1e7;
-        maxwblloglike(i)=max(wblloglike(:));
-        
-        lognloglike(~lognwhereuseful)=-1e7;
-        maxlognloglike(i)=max(lognloglike(:));
     end
 else
     error('no data')

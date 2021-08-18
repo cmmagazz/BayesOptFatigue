@@ -177,7 +177,7 @@ if ~isempty(data)
             progC(i,2)=max(theta{3}(depth));
             progC(i,3)=min(theta{3}(depth));
                     %find the theta and sigma with the highest value in lprior
-            maxval=max(exp(lprior(:))); %<<<<<<<<< CMM EDIT FROM 17/06/21 this is right!
+            maxval=max(exp(lprior),[],'all'); %<<<<<<<<< CMM EDIT FROM 17/06/21 this is right!
             idmin=exp(lprior)==maxval;
             
             I=find(idmin);
