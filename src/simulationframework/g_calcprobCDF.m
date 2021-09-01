@@ -1,4 +1,13 @@
 function prob=g_calcprobCDF(stress,theta,dist)
+% More generalised form to calculate the probability (CDF) of recording some result. Supported distributions: 
+%   - Normal                = 'norm'
+%   - Log Normal            = 'lognorm'
+%   - 2 Parameter Weibull   = '2pwbl'
+%   - 3 Parameter Weibull   = '3pwbl'
+%   - Generalised Extreme Value: 
+%       - Frechet           = 'gev'
+%       - Gumbel            = 'type1'
+
 if strcmp(dist,'norm')
     [A,B]=meshgrid(theta{1},theta{2});
     prob=normcdf(stress,A',B');
