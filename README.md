@@ -25,7 +25,7 @@ Supported Protocols are:
 
 A schematic flow diagram of the software is shown below:
 
-![Flow Chart of Code](./code_flow_chart.png)
+![Flow Chart of Code](./code_flow_chart.png) #
 
 ## Functions
 
