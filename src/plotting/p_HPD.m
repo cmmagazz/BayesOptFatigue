@@ -58,10 +58,10 @@ addOptional(p,'resultsfilename',defaultfilename,@ischar);
 addOptional(p,'savefigq',defaultsavefigq,@isnumeric);
 
 parse(p,arraytoplot,varargin{:});
+
 if ndims(arraytoplot)>2
    arraytoplot=sum(arraytoplot,3);
-%    array2=sum(arraytoplot,2);
-   
+%    array2=sum(arraytoplot,2);   
 end
     
 if p.Results.newfig==1
@@ -78,11 +78,12 @@ set(h, 'EdgeColor', 'none');
 colormap(parula)
 hold on
 
-scatter(p.Results.X(col),p.Results.Y(row),'kx')
+%PLOT THE MLE POINT AS AN X?
+% scatter(p.Results.X(col),p.Results.Y(row),'kx')
 
 xlabel('Standard deviation /MPa')
 ylabel('Mean Failure Strength /MPa')
-caxis([0,maxval])
+caxis([0,maxval]);
 hold off
 c=colorbar;
 c.Label.String='Probability';

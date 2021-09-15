@@ -30,3 +30,6 @@ codegen/
 # Octave session info
 octave-workspace
 staircasefordiffdists.m
+
+# temp folder
+temp/

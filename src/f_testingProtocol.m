@@ -54,7 +54,19 @@ if strcmp(ResultSet.details.protocol,'stress step')
         if isfield(ResultSet, 'plotq')
             if ResultSet.plotq==1
                 figure(2)
+                subplot(2,2,1)
                 p_SN(failurestress,'newfig',0)
+                subplot(2,2,2)
+                [lprior,~,~,~,progthet,progsig]=g_calcprior(failurestress,ResultSet.details.theta);
+                p_HPD(lprior,'newfig',0)
+                subplot(2,2,3)
+                plot(progthet(:,1))
+                xlabel('Sample Number')
+                ylabel('Estimate of Mean')
+                subplot(2,2,4)
+                plot(progsig(:,1))
+                xlabel('Sample Number')
+                ylabel('Estimate of Spread')
                 drawnow
             end
         end
@@ -90,7 +102,19 @@ elseif strcmp(ResultSet.details.protocol,'staircase')
         if isfield(ResultSet, 'plotq')
             if ResultSet.plotq==1
                 figure(2)
+                subplot(2,2,1)
                 p_SN(failurestress,'newfig',0)
+                subplot(2,2,2)
+                [lprior,~,~,~,progthet,progsig]=g_calcprior(failurestress,ResultSet.details.theta);
+                p_HPD(lprior,'newfig',0)
+                subplot(2,2,3)
+                plot(progthet(:,1))
+                xlabel('Sample Number')
+                ylabel('Estimate of Mean')
+                subplot(2,2,4)
+                plot(progsig(:,1))
+                xlabel('Sample Number')
+                ylabel('Estimate of Spread')
                 drawnow
             end
         end
@@ -205,10 +229,20 @@ elseif strcmp(ResultSet.details.protocol,'bayes staircase')||strcmp(ResultSet.de
         if isfield(ResultSet, 'plotq')
             if ResultSet.plotq==1
                 figure(2)
-                subplot(1,2,1)
+                subplot(2,2,1)
                 p_SN(failurestress,'newfig',0)
-                subplot(1,2,2)
-                p_HPD(lprior,'newfig',0)
+                subplot(2,2,2)
+                p_HPD(ResultSet.raw.lprior,'newfig',0)
+                
+                subplot(2,2,3)
+                [~,~,~,~,progthet,progsig]=g_calcprior(ResultSet);
+                plot(progthet(:,1))
+                xlabel('Sample Number')
+                ylabel('Estimate of Mean')
+                subplot(2,2,4)
+                plot(progsig(:,1))
+                xlabel('Sample Number')
+                ylabel('Estimate of Spread')
                 drawnow
             end
         end
@@ -246,12 +280,25 @@ elseif strcmp(ResultSet.details.protocol,'bayes step')
         if isfield(ResultSet, 'plotq')
             if ResultSet.plotq==1
                 figure(2)
+                subplot(2,2,1)
                 p_SN(failurestress,'newfig',0)
+                subplot(2,2,2)
+                p_HPD(ResultSet.raw.lprior,'newfig',0)
+                
+                subplot(2,2,3)
+                [~,~,~,~,progthet,progsig]=g_calcprior(ResultSet);
+                plot(progthet(:,1))
+                xlabel('Sample Number')
+                ylabel('Estimate of Mean')
+                subplot(2,2,4)
+                plot(progsig(:,1))
+                xlabel('Sample Number')
+                ylabel('Estimate of Spread')
                 drawnow
             end
         end
     end
-    
+    ResultSet.details.startingstress=origstartingstress;
     close(z)
 
 end

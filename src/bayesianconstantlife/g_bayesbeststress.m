@@ -91,9 +91,9 @@ end
 % SPECIMENS
 %{
 %Figure out which sample you're in
-k=evalin('caller','k');%CMM HACK : copy this line into B_simulate as well in order for this to work. 
-
-whichsamp=[1,2,3,20,60,90]; %which samples do you want to look at 
+k=evalin('caller','k');%CMM HACK : 
+whichsamp=[1,2,3,4]; %which samples do you want to look at 
+% whichsamp=[1,2,3,20,50,90]; %which samples do you want to look at 
 if ismember(k,whichsamp)
     stresstolookat=100:5:700;
     z=stresstolookat;

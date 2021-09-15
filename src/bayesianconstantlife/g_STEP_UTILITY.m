@@ -21,14 +21,14 @@ stepsize=ResultSet.details.step.stepsize;
 priorinfo=sum(lprior.*exp(lprior),'all');
 
 minstress=startingstress;
-maxval=f_HPD(squeeze(lprior),1-1e-6);
+
 murange=theta{1}(:);
-maxstress=max(murange);%+2*stepsize;
-minstressT=min(murange);%-2*stepsize; 
-%deal with max and min stresses outside a 'reasonable' range
-if isnan(minstressT)
-    warning('error in calculation')
-end
+maxstress=max(murange)+6*max(theta{2}(:));
+% minstressT=min(murange);%-2*stepsize; 
+% %deal with max and min stresses outside a 'reasonable' range
+% if isnan(minstressT)
+%     warning('error in calculation')
+% end
 % if minstressT<minstress
 %     1;
 % else

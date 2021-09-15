@@ -1,10 +1,11 @@
-function meanFS= f_createsample(TestingSet)
+function meanFS= f_createsample(TestingSet,varargin)
 %Monte Carlo method used to create a set of samlpes and 
 %"push" this sample away from the mean SN curve based on
 %a distribution set: 
 %SDistq(1)==1 is gaussian
 %SDistq(1)==2 is weibull
 %SDistq(1)==3 is log-normal
+%For SN models:
 %SDistq(2)==1 is Basquin Relationship (default if none given)
 %SDistq(2)==2 is Bi-linear
 
@@ -77,6 +78,15 @@ if numel(TestingSet.SDistq)>1
     end
 end
         
+%% plot?
+if numel(varargin)>0%
+    if varargin{1}==1
+        plot(TestingSet.N,meanFS')
+        xlabel('Log(Cycles)')
+        ylabel('Stress,MPa')
+    end
+end
+
 
 
 end

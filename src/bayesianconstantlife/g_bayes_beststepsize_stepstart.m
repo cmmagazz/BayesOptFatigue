@@ -24,7 +24,7 @@ fun=@(x)g_STEP_UTILITY(x,ResultSet);
 
 beststep=minstressstep;
 
-if numel(startingstresses)>40
+if numel(startingstresses)>400
     %if you have lots of startingstresses:
     % Coarse run through the range of stresses, and see where the utility
     % function actually has values that matter.
@@ -148,7 +148,7 @@ if numstresssteptolookat ==1
             error('Nans in the utility function')
         end
     end
-    figure(1)
+    figure(99)
     plot(startingstresses(:),z)
     hold on
     scatter(beststress,max(z));
@@ -172,7 +172,7 @@ else
     hold off
     pause(0.1)
     for i=1:numel(stepsizetolookat)
-        figure
+        figure(99)
         plot(gridz(i,:))
         pause(0.2)
     end
@@ -184,7 +184,7 @@ end
 %{
 
 k=evalin('caller','k');%CMM HACK : copy this line into B_STEPsimulate as well in order for this to work. 
-whichsamp=[1,2,3,20,40,70]; %which samples do you want to look at 
+whichsamp=[1,3,10,25,45,70]; %which samples do you want to look at 
 
 if ismember(k,whichsamp)
     z=zeros(1,numel(startingstresses));
@@ -193,15 +193,15 @@ if ismember(k,whichsamp)
         [z(i),second(i)]=fun(startingstresses(i));
     end
     z=-1.*z;
-    figure(1);
+    figure(9);
     z=z-min(z);%NORMALISE Z FOR CONVENIENCE
     z=z./max(z);
     z=z-(1+find(k==whichsamp));
-    plot(startingstresses,z);
+    plot(startingstresses+0,z);
     xlabel('Starting Stress');
     ylabel('Utility Function')
     hold on
-    scatter(beststress,max(z),'kx')
+    scatter(beststress+00,max(z),'kx')
     if k==whichsamp(end)
         for i=1:numel(whichsamp)
             legtext{i}=['Sample ',num2str(whichsamp(i))];

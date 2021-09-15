@@ -5,52 +5,37 @@
 tic
 %protocolstotest={1};
 filename='Paper figure BIC with different protocols';
-protocolstotest={2,12,5,9};
+protocolstotest={5,9,2,12};
 %protocolstotest={2};
-%filename = 'testAnimated3.gif';
-ResultSet.details.protocolnames={'adaptive','stress step','random',...
-    'adaptive midstep','staircase','probit','life','simple','bayes staircase',...
-    'bayes staircase flat prior','bayes staircase 1/x prior','bayes step'};
 %setup the results parameters
 %=============================================
 %step size constants
-ResultSet.details.startingstress=280;
-ResultSet.details.runout=6; %set the runout value
-ResultSet.details.step.steptype=1;%1=abs, 0=percent
-ResultSet.details.step.Nstepdown=3;
 redefineq=1;
-TestingSet.details.SDistq=1; %sample distribution: 1=gaussian, 2=weibull
-ResultSet.details.step.stepsize=5;
 %=============================================
 %SN data constants
-widths=[10];%,60];
-
+widths=[40];%,60];
 %=============================================
 %prior settings
-maxtheta=650;
-mintheta=150;
-thetaR=mintheta:1:maxtheta;
-ResultSet.details.theta=thetaR;
-% set upper and lower bound of possible values of sigma here
-maxsigma=200;
-minsigma=1;
-sigmaR=minsigma:1:maxsigma;
-ResultSet.details.sigma=sigmaR;
+ResultSet.details=f_setupresultsdist([[150, 650];[1, 400]],'norm',[250,200]);
+ResultSet.details.runout=6; %set the runout value
+
+ResultSet.details.protocolnames={'adaptive','stress step','random',...
+    'adaptive midstep','staircase','probit','life','simple','bayes staircase',...
+    'bayes staircase flat prior','bayes staircase 1/x prior','bayes step'};
 %=================================================
-nrepeats=100; %number of times to test
-nsamptotest=100;
+nrepeats=10; %number of times to test
+nsamptotest=50;
 %nsamptotest=unique(nsamptotest)+1; %equally spaced in log sample numbers, roughly 30 
 aic=NaN(length(protocolstotest),numel(widths),nrepeats,3,nsamptotest);
 bic=NaN(length(protocolstotest),numel(widths),nrepeats,3,nsamptotest);
-sdistk=2;
-for protocolk= 1:length(protocolstotest)
+sdistk=1;
+for protocolk=1:length(protocolstotest)
     ResultSet.details.protocol = ResultSet.details.protocolnames{protocolstotest{protocolk}};
     if strcmp(ResultSet.details.protocol,'bayes staircase')
         ResultSet.details.startingstress=350;
     elseif strcmp(ResultSet.details.protocol,'staircase')
         ResultSet.details.startingstress=350;
-        ResultSet.details.step.stepsize=20;
-        
+        ResultSet.details.step.stepsize=40;
     else
         ResultSet.details.startingstress=100;
         ResultSet.details.step.stepsize=40;
@@ -65,20 +50,20 @@ for protocolk= 1:length(protocolstotest)
             TestingSet.details.basquin.c=300;
             TestingSet.details.basquin.alpha=600;
             TestingSet.details.basquin.beta=-log(1/6)/log(6);
-            TestingSet.details.N=linspace(0.01,10,1000);
+            TestingSet.details.N=linspace(1,10,1000);
             TestingSet.details.DAMq=1;
             TestingSet.details.width=widths(widthl);%./stdconst(sdistk);
             TestingSet.details.numsamp=nsamptotest;
-            sigmax=NaN(length(nrepeats),1);
-            thetamax=NaN(length(nrepeats),1);
+%             sigmax=NaN(length(nrepeats),1);
+%             thetamax=NaN(length(nrepeats),1);
             disp(strcat('protocol ',{' '}, num2str(protocolk),'/',num2str(length(protocolstotest)),' width '...
                 ,{' '}, num2str(widthl),'/',num2str(length(widths)),'sample',{' '},' repeat',{' '},...
                 num2str(repeatz),'/',num2str(nrepeats)))
             %run the variable step sizes
             TestingSet.meanFS=f_createsample(TestingSet.details);
             %run the protocol
-            ResultSetraw=f_testingProtocol(TestingSet,ResultSet);
-            [aicT,bicT]=g_calcaic(ResultSetraw,1,thetaR,sigmaR);
+            ResultSet2=f_testingProtocol(TestingSet,ResultSet);
+            [aicT,bicT]=g_calcaic(ResultSet2.raw,1,ResultSet.details.theta{1},ResultSet.details.theta{2});
             aic(protocolk,widthl,repeatz,:,:)=aicT;
             bic(protocolk,widthl,repeatz,:,:)=bicT;
         end
@@ -96,7 +81,7 @@ for protocolk= 1:length(protocolstotest)
         k=2;%number of model params
         n=repmat(permute(1:nsamptotest,[3,1,2]),[nrepeats,3,1]);%number of samples for each model
         correctionterm=(2*k^2+2*k)./(n-k-1);
-        bictemp=bictemp-repmat(bictemp(:,1,:),[1,size(bictemp,2),1]);
+        bictemp=bictemp-repmat(bictemp(:,2,:),[1,size(bictemp,2),1]);
         meanarea=squeeze(mean(bictemp,1));
         stdarea=squeeze(std(bictemp,[],1));
         shadedErrorBar(1:nsamptotest,meanarea(1,:),stdarea(1,:),'lineProps',strcat('-',co(1)))
@@ -106,13 +91,13 @@ for protocolk= 1:length(protocolstotest)
         xlabel('Number of samples Tested')
         ylabel('\DeltaBIC')
         if protocolk ==1
-            title('Stress Step')
-        elseif protocolk ==2
-            title('Bayes Step')
-        elseif protocolk ==3
             title('Staircase')
+        elseif protocolk ==2
+            title('Bayesian Staircase')
+        elseif protocolk ==3
+            title('Stress Step')
         elseif protocolk ==4
-            title('Bayes Staircase')    
+            title('Bayesian Stress Step')    
         end
         hold on
         yline(2,'k--');
@@ -122,19 +107,22 @@ for protocolk= 1:length(protocolstotest)
         yline(-6,'k-.');
         yline(-10,'k-.');
         ylim([-12,12])
-        sgtitle(strcat('Weibull Distribution, \beta = ',num2str(widths(widthl))))
+        sgtitle(strcat('Normal Distribution, \sigma = ',num2str(widths(widthl))))
 
     end
 end
-J=protocolstotest{:}
+
 legend('Normal','Weibull','Log-Normal')
 
 % sgtitle(strcat('Stress Step, Bayes Information Criterion'));%,', Stepsize = ',{' '},num2str(ResultSet.details.step.stepsize)))
 % set(gcf, 'Position', get(0, 'Screensize'));
 % print([strcat('Number_of_Repeats_',num2str(nrepeats),'normalised AIC convergence, stepsize = ',num2str(ResultSet.details.step.stepsize)) filename], '-dpng','-r300')
+print(...
+    [strcat('Number_of_Repeats_',num2str(nrepeats),'normalised BIC convergence, stepsize = '...
+    ,num2str(ResultSet.details.step.stepsize)) filename], '-dpng','-r1500')
 % 
-% %close all
+close all
 % 
-% currdate=datestr(datetime);
-% currdate=currdate(1:11);
-% save([strcat('Number_of_Repeats_',num2str(nrepeats),'convergence test  50 test oone width') filename currdate '.mat']);
+currdate=datestr(datetime);
+currdate=currdate(1:11);
+save([strcat('Number_of_Repeats_',num2str(nrepeats),'convergence test  50 test oone width') filename currdate '.mat']);

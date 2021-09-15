@@ -11,8 +11,8 @@ close all
 clc
 %=============================================
 %Testing Set parameters and setup
-TestingSet.details.basquin.c=350;
-TestingSet.details.basquin.alpha=500;
+TestingSet.details.basquin.c=300;
+TestingSet.details.basquin.alpha=600;
 TestingSet.details.basquin.beta=-log(1/6)/log(6);
 TestingSet.details.N=linspace(0.5,10,1000); % in log N
 TestingSet.details.DAMq=1;%damage model: 1=none, 2=miner's rule
@@ -20,27 +20,29 @@ TestingSet.details.DAMq=1;%damage model: 1=none, 2=miner's rule
 %Sample distribution types - a 2 element vector with:
 %       first  element: sample distribution: 1=gaussian, 2=weibull
 %       optional second: mean model: 1=basquin (default), 2=bi-linear
-TestingSet.details.SDistq=[1,2]; 
+TestingSet.details.SDistq=[1,1]; 
 
-TestingSet.details.numsamp=100; %number of specimens
-TestingSet.details.width=20; %width in sigma
+TestingSet.details.numsamp=90; %number of specimens
+TestingSet.details.width=40; %width in sigma
 
-TestingSet.meanFS=f_createsample(TestingSet.details); %create the monte-carlo sample set
+TestingSet.meanFS=f_createsample(TestingSet.details,0); %create the monte-carlo sample set, 1=plot, 0=no plot
+
 %=============================================
 %Constant life prior constants: determine the space of parameters: 
 % Insert range of parameters, see function for details
 % Choose from: 'norm','lognorm','2pwbl','3pwbl'
 % Choose numel 
-% ResultSet.details=f_setupresultsdist([[300, 700];[1, 150]],'norm',150);
+ResultSet.details=f_setupresultsdist([[200, 600];[1, 400]],'norm',400);
 % ResultSet.details=f_setupresultsdist([[300, 700];[1, 150]./150],'lognorm',150);
 % ResultSet.details=f_setupresultsdist([[300, 700];[1, 150]],'2pwbl',150);
-ResultSet.details=f_setupresultsdist([[300, 700];[1, 150];[0,300]],'3pwbl',50);
+% ResultSet.details=f_setupresultsdist([[300, 700];[1, 150];[0,300]],'3pwbl',50);
 
 %=============================================
 %ResultSet parameters
-ResultSet.details.startingstress=150; %starting stress in MPa 
+
+ResultSet.details.step.stepsize=160; %step size in MPa
+ResultSet.details.startingstress=400-3.5*160; %starting stress in MPa 
 ResultSet.details.runout=6; %set the runout value in log(cycles)
-ResultSet.details.step.stepsize=100; %step size in MPa
 %% Simple run
 %Select a protocol from
 %     'stress step'
@@ -51,7 +53,9 @@ ResultSet.details.step.stepsize=100; %step size in MPa
 %     'bayes step'
 clc
 close all
-ResultSet.details.protocol = 'bayes step';
+TestingSet.details.numsamp=70; %number of specimens
+
+ResultSet.details.protocol = 'stress step';
 %Plot a diagnostic SN curve during collection? 1=yes, 0=no
 ResultSet.plotq=0;
 %Run the simulated test
@@ -66,7 +70,7 @@ xlabel('Sample Number')
 ylabel('Shannon Information')
 
 %% Plot the staircase plot of results
-p_staircaseplot(ResultSet.raw.failurestress)
+p_staircaseplot(ResultSet.raw.failurestress,'Staircase Plot',0)
 
 
 %% Plot the HPD
@@ -74,13 +78,16 @@ p_HPD(ResultSet.raw.lprior)
 
 %% Evaluate the joint posterior from a dataset
 % ** see here to evaluate a 
-[lprior,~,shannon]=g_calcprior(ResultSet.raw.failurestress,ResultSet.details.theta,ResultSet.details.sigma);
+[lprior,~,shannon]=g_calcprior(ResultSet);
 p_HPD(lprior)
 
 %% Run through 3d prior
-for i=1:size(ResultSet.raw.lprior,3)
-    pcolor(exp(squeeze(ResultSet.raw.lprior(:,:,i))));
+for i=1:size(lprior,3)
+    pcolor(exp(squeeze(lprior(:,:,i))));
     pause(0.1)
     colorbar
     hold on
 end
+%%
+p_HPD(squeeze(sum(lprior,3)))
+%}

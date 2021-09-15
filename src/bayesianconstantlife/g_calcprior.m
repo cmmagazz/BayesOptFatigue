@@ -7,8 +7,7 @@ function [lprior,x2fail,shannon,x2surv,progthet,progsig]=g_calcprior(ResultSet,t
 % INPUTS
 %   ResultSetraw: struct with only the raw field of ResultSet, OR the
 %   failurestress table immediately. 
-%   theta: the mean values possible, as a vector
-%   sigma: the standard deviation values possible, as a vector
+%   theta: the values possible, as a vector
 %   varargin: 
 %       lprior: the log of the prior/joint posterior, as an array. if not
 %       given, we initialise and evaluate
