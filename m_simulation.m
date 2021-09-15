@@ -43,6 +43,7 @@ ResultSet.details=f_setupresultsdist([[200, 600];[1, 400]],'norm',400);
 ResultSet.details.step.stepsize=160; %step size in MPa
 ResultSet.details.startingstress=400-3.5*160; %starting stress in MPa 
 ResultSet.details.runout=6; %set the runout value in log(cycles)
+
 %% Simple run
 %Select a protocol from
 %     'stress step'
@@ -81,6 +82,9 @@ p_HPD(ResultSet.raw.lprior)
 [lprior,~,shannon]=g_calcprior(ResultSet);
 p_HPD(lprior)
 
+%% Calculate BIC
+close all
+[aic,bic]=g_calcaic(ResultSet.raw,1);
 %% Run through 3d prior
 for i=1:size(lprior,3)
     pcolor(exp(squeeze(lprior(:,:,i))));

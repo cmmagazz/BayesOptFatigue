@@ -8,13 +8,21 @@ function ResultSetdetails=f_setupresultsdist(ranges,dist,NUMEL)
 
 if numel(NUMEL)>1
     secnumel=2;
-    thirdnumel=3;
+    if numel(NUMEL)==3
+        thirdnumel=3;
+    else
+        thirdnumel=2;
+    end
 else
     secnumel=1;
     thirdnumel=1;
 end
 
-if strcmp(dist,'norm') || isempty(dist)
+
+if isempty(dist) %set auto value
+    dist = 'norm';
+end
+if strcmp(dist,'norm') || strcmp(dist,'lognorm') || strcmp(dist,'2pwbl') || strcmp(dist,'type1')
     needsize=[2,2];
     if nnz(size(ranges)~=needsize)>0
         error('Need 2x2 for ranges')
@@ -66,7 +74,9 @@ elseif strcmp(dist,'2pwbl')
     ResultSetdetails.theta={A, B};
 
     ResultSetdetails.dist='2pwbl';
-elseif strcmp(dist,'3pwbl') 
+
+    ResultSetdetails.numparams=2;
+elseif strcmp(dist,'3pwbl') || strcmp(dist,'gev')
     needsize=[3,2];
     if nnz(size(ranges)~=needsize)>0
         error('Need 3x2 for ranges')
@@ -85,7 +95,7 @@ elseif strcmp(dist,'3pwbl')
 
     %Insert into ResultSet struct
     ResultSetdetails.theta={A, B, C};
-
-    ResultSetdetails.dist='3pwbl';
+    ResultSetdetails.numparams=3;
 end
+ResultSetdetails.dist=dist;
 end
