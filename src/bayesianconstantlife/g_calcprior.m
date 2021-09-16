@@ -52,7 +52,7 @@ elseif numel(varargin)==1
     end
 end
 
-
+% Initialise the prior if need be
 if ~exist('lprior','var') %if you are not given a prior:do the old method where you reupdate
     if ~exist('lpriorq','var')%set deafult to what we have always done
         lpriorq=2;
@@ -80,7 +80,8 @@ else
         data=data(end,:);
     end
 end
-    
+
+%Evaluate probabilities
 if ~isempty(data)
     failstress=data(:,1);
     runoutstress=data(:,3);

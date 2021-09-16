@@ -60,13 +60,13 @@ if strcmp(ResultSet.details.protocol,'stress step')
                 [lprior,~,~,~,progthet,progsig]=g_calcprior(failurestress,ResultSet.details.theta);
                 p_HPD(lprior,'newfig',0)
                 subplot(2,2,3)
-                plot(progthet(:,1))
+                errorbar(1:k,progthet(:,1),progthet(:,1)-progthet(:,3),progthet(:,2)-progthet(:,1))
                 xlabel('Sample Number')
-                ylabel('Estimate of Mean')
+                ylabel('Estimate of Mean /MPa')
                 subplot(2,2,4)
-                plot(progsig(:,1))
+                errorbar(1:k,progsig(:,1),progsig(:,1)-progsig(:,3),progsig(:,2)-progsig(:,1))
                 xlabel('Sample Number')
-                ylabel('Estimate of Spread')
+                ylabel('Estimate of Spread /MPa')
                 drawnow
             end
         end
@@ -108,13 +108,13 @@ elseif strcmp(ResultSet.details.protocol,'staircase')
                 [lprior,~,~,~,progthet,progsig]=g_calcprior(failurestress,ResultSet.details.theta);
                 p_HPD(lprior,'newfig',0)
                 subplot(2,2,3)
-                plot(progthet(:,1))
+                errorbar(1:k,progthet(:,1),progthet(:,1)-progthet(:,3),progthet(:,2)-progthet(:,1))
                 xlabel('Sample Number')
-                ylabel('Estimate of Mean')
+                ylabel('Estimate of Mean /MPa')
                 subplot(2,2,4)
-                plot(progsig(:,1))
+                errorbar(1:k,progsig(:,1),progsig(:,1)-progsig(:,3),progsig(:,2)-progsig(:,1))
                 xlabel('Sample Number')
-                ylabel('Estimate of Spread')
+                ylabel('Estimate of Spread /MPa')
                 drawnow
             end
         end
@@ -236,13 +236,13 @@ elseif strcmp(ResultSet.details.protocol,'bayes staircase')||strcmp(ResultSet.de
                 
                 subplot(2,2,3)
                 [~,~,~,~,progthet,progsig]=g_calcprior(ResultSet);
-                plot(progthet(:,1))
+                errorbar(1:k,progthet(:,1),progthet(:,1)-progthet(:,3),progthet(:,2)-progthet(:,1))
                 xlabel('Sample Number')
-                ylabel('Estimate of Mean')
+                ylabel('Estimate of Mean /MPa')
                 subplot(2,2,4)
-                plot(progsig(:,1))
+                errorbar(1:k,progsig(:,1),progsig(:,1)-progsig(:,3),progsig(:,2)-progsig(:,1))
                 xlabel('Sample Number')
-                ylabel('Estimate of Spread')
+                ylabel('Estimate of Spread /MPa')
                 drawnow
             end
         end
@@ -287,13 +287,13 @@ elseif strcmp(ResultSet.details.protocol,'bayes step')
                 
                 subplot(2,2,3)
                 [~,~,~,~,progthet,progsig]=g_calcprior(ResultSet);
-                plot(progthet(:,1))
+                errorbar(1:k,progthet(:,1),progthet(:,1)-progthet(:,3),progthet(:,2)-progthet(:,1))
                 xlabel('Sample Number')
-                ylabel('Estimate of Mean')
+                ylabel('Estimate of Mean /MPa')
                 subplot(2,2,4)
-                plot(progsig(:,1))
+                errorbar(1:k,progsig(:,1),progsig(:,1)-progsig(:,3),progsig(:,2)-progsig(:,1))
                 xlabel('Sample Number')
-                ylabel('Estimate of Spread')
+                ylabel('Estimate of Spread /MPa')
                 drawnow
             end
         end

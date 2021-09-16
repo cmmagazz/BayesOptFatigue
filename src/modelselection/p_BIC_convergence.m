@@ -2,6 +2,7 @@
 %for distributions of the input sample set.
 %=============================================
 %protocol constants
+clear
 tic
 %protocolstotest={1};
 filename='Paper figure BIC with different protocols';
@@ -23,21 +24,21 @@ ResultSet.details.protocolnames={'adaptive','stress step','random',...
     'adaptive midstep','staircase','probit','life','simple','bayes staircase',...
     'bayes staircase flat prior','bayes staircase 1/x prior','bayes step'};
 %=================================================
-nrepeats=10; %number of times to test
-nsamptotest=50;
+nrepeats=100; %number of times to test
+nsamptotest=80;
 %nsamptotest=unique(nsamptotest)+1; %equally spaced in log sample numbers, roughly 30 
-aic=NaN(length(protocolstotest),numel(widths),nrepeats,3,nsamptotest);
-bic=NaN(length(protocolstotest),numel(widths),nrepeats,3,nsamptotest);
+aic=NaN(length(protocolstotest),numel(widths),nrepeats,6,nsamptotest);
+bic=NaN(length(protocolstotest),numel(widths),nrepeats,6,nsamptotest);
 sdistk=1;
 for protocolk=1:length(protocolstotest)
     ResultSet.details.protocol = ResultSet.details.protocolnames{protocolstotest{protocolk}};
     if strcmp(ResultSet.details.protocol,'bayes staircase')
-        ResultSet.details.startingstress=350;
+        ResultSet.details.startingstress=380;
     elseif strcmp(ResultSet.details.protocol,'staircase')
-        ResultSet.details.startingstress=350;
+        ResultSet.details.startingstress=380;
         ResultSet.details.step.stepsize=40;
     else
-        ResultSet.details.startingstress=100;
+        ResultSet.details.startingstress=0;
         ResultSet.details.step.stepsize=40;
     end
     stdconst=[1,4,350];
@@ -63,7 +64,7 @@ for protocolk=1:length(protocolstotest)
             TestingSet.meanFS=f_createsample(TestingSet.details);
             %run the protocol
             ResultSet2=f_testingProtocol(TestingSet,ResultSet);
-            [aicT,bicT]=g_calcaic(ResultSet2.raw,1,ResultSet.details.theta{1},ResultSet.details.theta{2});
+            [aicT,bicT]=g_calcaic(ResultSet2.raw,1);
             aic(protocolk,widthl,repeatz,:,:)=aicT;
             bic(protocolk,widthl,repeatz,:,:)=bicT;
         end
@@ -72,7 +73,9 @@ end
 toc
 
 %% plot BIC
-co='grbcmyrgbcmyk';
+colours=['grbcmyrgbcmyk']';
+
+
 figure
 for protocolk= 1:length(protocolstotest)
     for widthl=1%1:numel(widths)
@@ -80,14 +83,23 @@ for protocolk= 1:length(protocolstotest)
         bictemp=squeeze(bic(protocolk,widthl,:,:,:));
         k=2;%number of model params
         n=repmat(permute(1:nsamptotest,[3,1,2]),[nrepeats,3,1]);%number of samples for each model
-        correctionterm=(2*k^2+2*k)./(n-k-1);
-        bictemp=bictemp-repmat(bictemp(:,2,:),[1,size(bictemp,2),1]);
+        bictemp=bictemp-repmat(bictemp(:,3,:),[1,size(bictemp,2),1]);
         meanarea=squeeze(mean(bictemp,1));
         stdarea=squeeze(std(bictemp,[],1));
-        shadedErrorBar(1:nsamptotest,meanarea(1,:),stdarea(1,:),'lineProps',strcat('-',co(1)))
+
+        shadedErrorBar(1:nsamptotest,meanarea(1,:),stdarea(1,:),'lineProps',...
+            {strcat('-',colours(1,:)),'markerfacecolor',colours(1,:)})
         hold on 
-        shadedErrorBar(1:nsamptotest,meanarea(2,:),stdarea(2,:),'lineProps',strcat('-',co(2)))
-        shadedErrorBar(1:nsamptotest,meanarea(3,:),stdarea(3,:),'lineProps',strcat('-',co(3)))
+        shadedErrorBar(1:nsamptotest,meanarea(2,:),stdarea(2,:),'lineProps',...
+            {strcat('-',colours(2,:)),'markerfacecolor',colours(2,:)})
+        shadedErrorBar(1:nsamptotest,meanarea(3,:),stdarea(3,:),'lineProps',...
+            {strcat('-',colours(3,:)),'markerfacecolor',colours(3,:)})
+%         shadedErrorBar(1:nsamptotest,meanarea(4,:),stdarea(4,:),'lineProps',...
+%             {strcat('-',colours(4,:)),'markerfacecolor',colours(4,:)})
+%         shadedErrorBar(1:nsamptotest,meanarea(5,:),stdarea(5,:),'lineProps',...
+%             {strcat('-',colours(5,:)),'markerfacecolor',colours(5,:)})
+%         shadedErrorBar(1:nsamptotest,meanarea(6,:),stdarea(6,:),'lineProps',...
+%             {strcat('-',colours(6,:)),'markerfacecolor',colours(6,:)})
         xlabel('Number of samples Tested')
         ylabel('\DeltaBIC')
         if protocolk ==1
@@ -112,7 +124,8 @@ for protocolk= 1:length(protocolstotest)
     end
 end
 
-legend('Normal','Weibull','Log-Normal')
+% legend('Normal','Log-Normal','2-Parameter Weibull','3-Parameter Weibull','Gumbell','Frechet')
+legend('Normal','Log-Normal','Weibull');%,'3-Parameter Weibull','Gumbell','Frechet')
 
 % sgtitle(strcat('Stress Step, Bayes Information Criterion'));%,', Stepsize = ',{' '},num2str(ResultSet.details.step.stepsize)))
 % set(gcf, 'Position', get(0, 'Screensize'));
@@ -120,7 +133,7 @@ legend('Normal','Weibull','Log-Normal')
 print(...
     [strcat('Number_of_Repeats_',num2str(nrepeats),'normalised BIC convergence, stepsize = '...
     ,num2str(ResultSet.details.step.stepsize)) filename], '-dpng','-r1500')
-% 
+%%
 close all
 % 
 currdate=datestr(datetime);

@@ -32,7 +32,7 @@ TestingSet.meanFS=f_createsample(TestingSet.details,0); %create the monte-carlo 
 % Insert range of parameters, see function for details
 % Choose from: 'norm','lognorm','2pwbl','3pwbl'
 % Choose numel 
-ResultSet.details=f_setupresultsdist([[200, 600];[1, 400]],'norm',400);
+ResultSet.details=f_setupresultsdist([[200, 600];[1, 400]],'norm',[250,200]);
 % ResultSet.details=f_setupresultsdist([[300, 700];[1, 150]./150],'lognorm',150);
 % ResultSet.details=f_setupresultsdist([[300, 700];[1, 150]],'2pwbl',150);
 % ResultSet.details=f_setupresultsdist([[300, 700];[1, 150];[0,300]],'3pwbl',50);
@@ -40,7 +40,7 @@ ResultSet.details=f_setupresultsdist([[200, 600];[1, 400]],'norm',400);
 %=============================================
 %ResultSet parameters
 
-ResultSet.details.step.stepsize=160; %step size in MPa
+ResultSet.details.step.stepsize=10; %step size in MPa
 ResultSet.details.startingstress=400-3.5*160; %starting stress in MPa 
 ResultSet.details.runout=6; %set the runout value in log(cycles)
 
@@ -56,7 +56,7 @@ clc
 close all
 TestingSet.details.numsamp=70; %number of specimens
 
-ResultSet.details.protocol = 'stress step';
+ResultSet.details.protocol = 'staircase';
 %Plot a diagnostic SN curve during collection? 1=yes, 0=no
 ResultSet.plotq=0;
 %Run the simulated test

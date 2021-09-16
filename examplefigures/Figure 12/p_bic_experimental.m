@@ -7,22 +7,22 @@ ResultSet.details=f_setupresultsdist([[150, 650];[1, 400]],'norm',[250,200]);
 totalresults=f_SNresults(totalresults);
 
 %% setup results
-bic=NaN(4,3,30);
+bic=NaN(4,6,30);
 
 for i=1:4
     
     if i==1
-        [~,bicT]=g_calcaic(staircaseresults.SN.results,1,ResultSet.details.theta{1},ResultSet.details.theta{2});
+        [~,bicT]=g_calcaic(staircaseresults.SN.results,1);
     elseif i==2
-        [~,bicT]=g_calcaic(bayesresults.SN.results,1,ResultSet.details.theta{1},ResultSet.details.theta{2});
+        [~,bicT]=g_calcaic(bayesresults.SN.results,1);
     elseif i==3
-        [~,bicT]=g_calcaic(stepresults.SN.results,1,ResultSet.details.theta{1},ResultSet.details.theta{2});
+        [~,bicT]=g_calcaic(stepresults.SN.results,1);
     elseif i==4
-        [~,bicT]=g_calcaic(bayesstepresults.SN.results,1,ResultSet.details.theta{1},ResultSet.details.theta{2});
+        [~,bicT]=g_calcaic(bayesstepresults.SN.results,1);
     end
         
         
-    bic(i,:,:)=bicT;
+    bic(i,:,1:size(bicT,2))=bicT;
 
 end
 %% plot relative to normal
@@ -34,8 +34,8 @@ for i= 1:4
         bictemp=squeeze(bic(i,:,:));
         k=2;%number of model params
         n=repmat(permute(1:30,[3,1,2]),[1,3,1]);%number of samples for each model
-        correctionterm=(2*k^2+2*k)./(n-k-1);
-        bictemp=bictemp-repmat(bictemp(2,:),[3,1]);
+
+        bictemp=bictemp-repmat(bictemp(3,:),[6,1]);
         plot(bictemp')
         xlabel('Number of samples Tested')
         ylabel('\DeltaBIC')
@@ -60,14 +60,15 @@ for i= 1:4
 
     
 end
-legend('Normal','Weibull','Log-Normal')
+legend('Normal','Log-Normal','2-Parameter Weibull','3-Parameter Weibull','Gumbell','Frechet')
+%%
 print(...
-    ['experimental bic for each protocol'], '-dpng','-r1500')
+    ['experimental bic for each protocol-minusoutlier'], '-dpng','-r1500')
 %% for all of it
 
 % totalresults=f_SNresults(totalresults);
-        [~,bigbic]=g_calcaic(totalresults.SN.results,1,ResultSet.details.theta{1},ResultSet.details.theta{2});
-        bigbic=bigbic-repmat(bigbic(2,:),[3,1]);
+        [~,bigbic]=g_calcaic(totalresults.SN.results,1);
+        bigbic=bigbic-repmat(bigbic(3,:),[6,1]);
 plot(bigbic')
         xlabel('Number of samples Tested')
         ylabel('\DeltaBIC')
@@ -80,7 +81,7 @@ plot(bigbic')
         yline(-6,'k-.');
         yline(-10,'k-.');
         ylim([-12,12])
-        legend('Normal','Weibull','Log-Normal')
+legend('Normal','Log-Normal','2-Parameter Weibull','3-Parameter Weibull','Gumbell','Frechet')
 
         title('Experimental \Delta BIC - All Results')
         

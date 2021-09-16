@@ -16,19 +16,19 @@ function [aic,bic,normloglike,wblloglike,lognloglike]=g_calcaic(data,constantlif
 wblconst=1;
 lognconst=1;
 distnames={'norm','lognorm','2pwbl','3pwbl','gev','type1'};
-theta={[[100, 500];[1, 150]],...
-    [[100, 500];[0, 0.5]./lognconst],...
-    [[100, 500];[1, 80]./wblconst],...
-    [[100, 1000];[1, 150]./wblconst;[-500,500]],...
-    [[100, 500];[1, 150]./wblconst;[-1,1]],...
-    [[100, 500];[1, 150]]};
+theta={[[150, 650];[1, 150]],...
+    [[150, 650];[0, 0.5]./lognconst],...
+    [[150, 650];[1, 80]./wblconst],...
+    [[150, 2000];[1, 150]./wblconst;[-500,500]],...
+    [[150, 650];[1, 150]./wblconst;[-5,5]],...
+    [[150, 650];[1, 150]]};
 NUMEL=[100,100,100,100,100,100];
 numparam=[2,2,2,3,3,2];
 numplots=numparam-1;
 if constantlife1==1
     [loglike,logL]=g_calcloglike(data,theta,distnames,NUMEL);
     %DEBUG - plot the log-likelihood surface
-    %{d
+    %{
     figure(1)
     for distid=1:length(distnames)  
         TempResultdetails=f_setupresultsdist(theta{distid},distnames{distid},NUMEL(distid));
@@ -81,6 +81,7 @@ if constantlife1==1
     drawnow
     %}
     %% 
+    %{
     figure(2)
     for distid=1:length(distnames)  
         TempResultdetails=f_setupresultsdist(theta{distid},distnames{distid},NUMEL(distid));
@@ -98,7 +99,8 @@ if constantlife1==1
     drawnow
     ylabel('Probability')
     xlabel('Stress')
-    %{d
+    %}
+    %{
     figure(3)
     for distid=1:length(distnames)
         subplot(1,length(distnames),distid)
@@ -140,6 +142,7 @@ for distid=1:length(distnames)%for every model
 
 end
 %% DEBUG - plot BICs
+%{
 figure(4)
 refdist='norm';
 for distid=1:length(distnames)
@@ -157,3 +160,4 @@ yline(-2,'k-.');
 yline(-6,'k-.');
 yline(-10,'k-.');
 ylim([-12,12])
+%}
