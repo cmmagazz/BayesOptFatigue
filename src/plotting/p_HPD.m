@@ -79,7 +79,7 @@ colormap(parula)
 hold on
 
 %PLOT THE MLE POINT AS AN X?
-% scatter(p.Results.X(col),p.Results.Y(row),'kx')
+scatter(p.Results.X(col),p.Results.Y(row),'kx')
 
 xlabel('Standard deviation /MPa')
 ylabel('Mean Failure Strength /MPa')

@@ -4,7 +4,7 @@
 % The aim is to run these section by section - pressing ctrl+shift+enter
 % CMM 2020
 
-resultsfilename='fatigueresults.mat';
+resultsfilename='FatigueTestResults.mat';
 
 %LOAD PREVIOUS DATA:
 try
@@ -14,7 +14,7 @@ catch
 end
 %% Sample Details:
 
-sample='b'; %input sample name
+sample='a'; %input sample name
 try 
     exists(totalresults.(sample))
     disp('Continuing test')
@@ -36,17 +36,17 @@ testdet.protocol    = 'bayes step'; %choose a protocol from key:
 
 %===== Necessary details
 testdet.runout          = 1e6; %what's the runout value in cycles
-testdet.step            = 50; %IF STEP TESTINGminimum stress step in MPa
+testdet.step            = 50; %IF STEP TESTING minimum stress step in MPa
 testdet.startingstress  = 100; %minimum starting stress in MPa
 totalresults.(sample).testdet=testdet;
 testdet.prevsampdet     = f_findprevsamp(totalresults,testdet); %if there was a previous sample at that life (string or NaN)
 testdet.testfreq        = 20400; %test frequency in Hz
 
 %===== If using Bayesian methods, details of the prior space
-testdet.theta=100:10:1000;
+testdet.theta{1}=100:10:1000;
 % set upper and lower bound of possible values of sigma here
-testdet.sigma=1:10:100;
-
+testdet.theta{2}=1:10:100;
+testdet.dist='norm';    %model the distribution with some function (norm, lognorm, 2pwbl, 3pwbl, gev, type1)
 %===== any other details that are useful but not necessary
 testdet.time        =   clock; %decimal time of experiment
 testdet.torqwrench  =   4; %torque wrench setting in Nm

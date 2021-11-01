@@ -24,22 +24,6 @@ minstress=startingstress;
 
 murange=theta{1}(:);
 maxstress=max(murange)+6*max(theta{2}(:));
-% minstressT=min(murange);%-2*stepsize; 
-% %deal with max and min stresses outside a 'reasonable' range
-% if isnan(minstressT)
-%     warning('error in calculation')
-% end
-% if minstressT<minstress
-%     1;
-% else
-% %     round the min stress values onto the 'grid'
-%     minstress=interp1(minstress-100*stepsize:stepsize:max(theta{1}),minstress-100*stepsize:stepsize:max(theta{1}),minstressT,'nearest');
-%     %we only want to look 
-% %     within the 95% HPD of the prior, but since we want to 
-% %     controll our pertubation of starting stress about the 'grid' of testing 
-% %     values to be able to extract more information, we want to round the minimum 
-% %     of the prior towards values that we would have tested on the perturbed 'grid'
-% end
 
 stresses=minstress:stepsize:maxstress;
 

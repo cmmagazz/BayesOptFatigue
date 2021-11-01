@@ -47,8 +47,6 @@ General Calculation Functions:
 * f_SNresults - compile the results of an experimental campaign
 
 Bayesian Calculation Functions
-* **B_simulate** - runs constant life bayesian staircase protocol
-* **B_STEP_simulate** - runs constant life bayesian step protocol
 * **g_bayes_beststepsize_stepstart** - runs step utility function for all possible test parameters and optuts maximum value
 * **g_bayesbeststress** - runs staircase utility function for all possible test parameters and optuts maximum value
 * **g_calcprior** - updates parameter probabilities based on data and bayes theorem and outputs new log(prior)
@@ -72,8 +70,7 @@ Plotting Functions:
 
 * **TestingSet** - Details of testing
 * **ResultsSet** - Results of testing so far
-* **Theta** - Vector of allowed means
-* **Sigma** - Vector of allowed standard deviations
+* **Theta** - Vector of allowed means and scales
 * **lprior** - joint posterior/prior of data, logged for storage
 * **failurestress** - Results of tests - Failure stress (MPa), Numebr of steps to failure, Runout Stress (MPa), Cyces for runout life (log(cycles)), Failure Tally (1=fail, 0=runout)
 * **stepsize** - step size used for step or staircase testing

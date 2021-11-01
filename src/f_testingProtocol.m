@@ -28,6 +28,8 @@ function [ResultSet]=f_testingProtocol(TestingSet,ResultSet)
 %   4: Cycles for Runout Life (log(cycles))
 %   5: Cycles to failure (log(cycles))
 %   6: Failure Tally (1=fail, 0=runout)
+
+%extract useful details
 numsamp = TestingSet.details.numsamp;
 try
     startingstress=ResultSet.details.startingstress;
@@ -37,10 +39,9 @@ catch
     ResultSet = rmfield(ResultSet,fn(~strcmp(fn,'details')));
     startingstress=ResultSet.details.startingstress;
 end
-
 stepsize=ResultSet.details.step.stepsize;
 
-
+%initialise failurestress
 failurestress=NaN(numsamp,6);
 
 if strcmp(ResultSet.details.protocol,'stress step')

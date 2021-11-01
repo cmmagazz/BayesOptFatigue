@@ -112,27 +112,32 @@ elseif strcmp(samplelevelresults.testdet.protocol,'bayes staircase')
         failurestress=samplelevelresults.testdet.prevsampdet.failurestress;
          % set the upper and lower bounds of possible values of theta here
         if isfield(samplelevelresults.testdet,'theta') 
-            theta=samplelevelresults.testdet.theta;
-            sigma=samplelevelresults.testdet.sigma;
+            theta{1}=samplelevelresults.testdet.theta{1};
+            theta{2}=samplelevelresults.testdet.theta{2};
         else
             disp('Prior space not given, using default values here')
             maxtheta=1000;
             mintheta=100;
-            theta=mintheta:1:maxtheta;
+            theta{1}=mintheta:1:maxtheta;
             % set upper and lower bound of possible values of sigma here
             maxsigma=400;
             minsigma=1;
-            sigma=minsigma:1:maxsigma;
-            testresults.(s(i)).stress=B_simulate(failurestress,theta,sigma);
+            theta{2}=minsigma:1:maxsigma;
+
         end
+
+        ResultSet.raw.failurestress=failurestress;
+        ResultSet.details.theta=theta;
+        ResultSet.details.dist=samplelevelresults.testdet.dist;
         %calculate the prior if need be
         if isfield(samplelevelresults.testdet,'lprior')
             lprior=samplelevelresults.testdet.lprior;
         else
-            lprior=g_calcprior(failurestress,theta,sigma);
+            lprior=g_calcprior(failurestress,theta);
         end
+        ResultSet.raw.lprior=lprior; %initialise the prior
         %find the next stress
-        testresults.(s(i)).stress=B_simulate(failurestress,theta,sigma,2,lprior);
+        testresults.(s(i)).stress=g_bayesbeststress(ResultSet);
         disp(['Next sample stress based on Bayesian Staircase at: '...
             ,num2str(testresults.(s(i)).stress,4),'MPa']);
     else
@@ -180,26 +185,36 @@ elseif strcmp(samplelevelresults.testdet.protocol,'bayes step')
         failurestress=samplelevelresults.testdet.prevsampdet.failurestress;
          % set the upper and lower bounds of possible values of theta here
         if isfield(samplelevelresults.testdet,'theta') 
-            theta=samplelevelresults.testdet.theta;
-            sigma=samplelevelresults.testdet.sigma;
-            startingstress=samplelevelresults.testdet.startingstress;
+            theta{1}=samplelevelresults.testdet.theta{1};
+            theta{2}=samplelevelresults.testdet.theta{2};
         else
             disp('Prior space not given, using default values here')
-            maxtheta=1200;
+            maxtheta=1000;
             mintheta=100;
-            theta=mintheta:2:maxtheta;
+            theta{1}=mintheta:1:maxtheta;
             % set upper and lower bound of possible values of sigma here
-            maxsigma=600;
+            maxsigma=400;
             minsigma=1;
-            sigma=minsigma:1:maxsigma;
-            startingstress=samplelevelresults.testdet.startingstress;
+            theta{2}=minsigma:1:maxsigma;
         end
+        startingstress=samplelevelresults.testdet.startingstress;
+        
+        %Place everything in the existing structures
+        ResultSet.raw.failurestress=failurestress;
+        ResultSet.details.theta=theta;
+        ResultSet.details.dist=samplelevelresults.testdet.dist;
+        ResultSet.details.step.stepsize=samplelevelresults.testdet.step;
+        ResultSet.details.startingstress=startingstress;
+        %calculate the prior if need be
         if isfield(samplelevelresults.testdet,'lprior')
             lprior=samplelevelresults.testdet.lprior;
         else
-            lprior=g_calcprior(failurestress,theta,sigma);
+            lprior=g_calcprior(failurestress,theta);
         end
-        testresults.(s(i)).stress=B_STEP_simulate(failurestress,theta,sigma, startingstress,minstressstep,lprior);
+        ResultSet.raw.lprior=lprior; 
+        %calculate the next best stress
+        [testresults.(s(i)).stress,~]=g_bayes_beststepsize_stepstart(ResultSet);
+
         disp(['Next sample stress based on Bayesian Step at: '...
             ,num2str(testresults.(s(i)).stress,4),'MPa']);
     else

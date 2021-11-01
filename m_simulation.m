@@ -9,6 +9,7 @@
 clear all
 close all
 clc
+addpath(genpath('src'));
 %=============================================
 %Testing Set parameters and setup
 TestingSet.details.basquin.c=300;
@@ -20,7 +21,7 @@ TestingSet.details.DAMq=1;%damage model: 1=none, 2=miner's rule
 %Sample distribution types - a 2 element vector with:
 %       first  element: sample distribution: 1=gaussian, 2=weibull
 %       optional second: mean model: 1=basquin (default), 2=bi-linear
-TestingSet.details.SDistq=[1,1]; 
+TestingSet.details.SDistq=[1,2]; 
 
 TestingSet.details.numsamp=90; %number of specimens
 TestingSet.details.width=40; %width in sigma
@@ -30,7 +31,7 @@ TestingSet.meanFS=f_createsample(TestingSet.details,0); %create the monte-carlo 
 %=============================================
 %Constant life prior constants: determine the space of parameters: 
 % Insert range of parameters, see function for details
-% Choose from: 'norm','lognorm','2pwbl','3pwbl'
+% Choose from: 'norm','lognorm','2pwbl','3pwbl','gumbell'
 % Choose numel 
 ResultSet.details=f_setupresultsdist([[200, 600];[1, 400]],'norm',[250,200]);
 % ResultSet.details=f_setupresultsdist([[300, 700];[1, 150]./150],'lognorm',150);
@@ -40,8 +41,8 @@ ResultSet.details=f_setupresultsdist([[200, 600];[1, 400]],'norm',[250,200]);
 %=============================================
 %ResultSet parameters
 
-ResultSet.details.step.stepsize=10; %step size in MPa
-ResultSet.details.startingstress=400-3.5*160; %starting stress in MPa 
+ResultSet.details.step.stepsize=20; %step size in MPa
+ResultSet.details.startingstress=350; %starting stress in MPa 
 ResultSet.details.runout=6; %set the runout value in log(cycles)
 
 %% Simple run
@@ -54,9 +55,9 @@ ResultSet.details.runout=6; %set the runout value in log(cycles)
 %     'bayes step'
 clc
 close all
-TestingSet.details.numsamp=70; %number of specimens
+TestingSet.details.numsamp=10; %number of specimens
 
-ResultSet.details.protocol = 'staircase';
+ResultSet.details.protocol = 'bayes staircase';
 %Plot a diagnostic SN curve during collection? 1=yes, 0=no
 ResultSet.plotq=0;
 %Run the simulated test
@@ -75,6 +76,8 @@ p_staircaseplot(ResultSet.raw.failurestress,'Staircase Plot',0)
 
 
 %% Plot the HPD
+ResultSet.raw.lprior=g_calcprior(ResultSet);
+
 p_HPD(ResultSet.raw.lprior)
 
 %% Evaluate the joint posterior from a dataset
