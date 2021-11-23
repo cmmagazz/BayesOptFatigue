@@ -45,7 +45,7 @@ testdet.testfreq        = 20400; %test frequency in Hz
 %===== If using Bayesian methods, details of the prior space
 testdet.theta{1}=100:10:1000;
 % set upper and lower bound of possible values of sigma here
-testdet.theta{2}=1:10:100;
+testdet.theta{2}=1:10:200;
 testdet.dist='norm';    %model the distribution with some function (norm, lognorm, 2pwbl, 3pwbl, gev, type1)
 %===== any other details that are useful but not necessary
 testdet.time        =   clock; %decimal time of experiment

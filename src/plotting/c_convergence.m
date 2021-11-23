@@ -5,7 +5,7 @@
 %protocol constants
 clear; clc; close all
 
-protocolstotest={2,5};
+protocolstotest={1,6};
 
 % 1=stress step
 % 2=staircase
@@ -15,18 +15,21 @@ protocolstotest={2,5};
 % 6=bayes step
 
 %=================================================
-nrepeats=2; %number of repeats of the experiment
-numsamp=10;
+nrepeats=200; %number of repeats of the experiment
+numsamp=30;
 distwidth=40; %true distribution width
 
 %what ratios of width to step size to test
-widths=linspace(0.5,15,20);
+% widths=linspace(0.5,15,10);%Staircase or
+widths=[0.5,5,10];%Step
+
 
 %Set up results arrays
 progthet=zeros(length(protocolstotest),numel(widths),nrepeats,numsamp,3);
 progsig=zeros(length(protocolstotest),numel(widths),nrepeats,numsamp,3);
 shannon=zeros(length(protocolstotest),numel(widths),nrepeats,numsamp);
-
+bigresultstemp=cell(numel(widths),nrepeats);
+bigresults=cell(length(protocolstotest));
 %run through each protocol
 for protocolk=1:length(protocolstotest)
     disp(['Doing protocol: ', num2str(protocolk)])
@@ -50,17 +53,17 @@ for protocolk=1:length(protocolstotest)
             'staircase','probit','life','bayes staircase','bayes step'};
         ResultSetdetails.protocol = ResultSetdetails.protocolnames{protocolstotest{protocolk}};
         ResultSetdetails.runout=6; %set the runout value
-        
+        ResultSetdetails.dist='norm';
 
-        maxtheta=600;
-        mintheta=201;
-        theta=mintheta:10:maxtheta;
+        maxtheta=1000;
+        mintheta=-101;
+        theta=mintheta:5:maxtheta;
         % set upper and lower bound of possible values of sigma here
         maxsigma=200;
         minsigma=1;
-        sigma=minsigma:8:maxsigma;
-        ResultSetdetails.theta=theta;
-        ResultSetdetails.sigma=sigma;
+        sigma=minsigma:4:maxsigma;
+        ResultSetdetails.theta{1}=theta;
+        ResultSetdetails.theta{2}=sigma;
         
         %CHANGE THE MAIN VARIABLE
         ResultSetdetails.step.stepsize=widths(widthl)*TestingSet.details.width;
@@ -69,7 +72,7 @@ for protocolk=1:length(protocolstotest)
         for repeatz=1:nrepeats
             disp(['repeat ',num2str(repeatz)])
             %randomise the starting point for step a little
-            ResultSetdetails.startingstress=150-rand*ResultSetdetails.step.stepsize;
+            ResultSetdetails.startingstress=50-rand*ResultSetdetails.step.stepsize;
             %randomise the starting point for staircase a little
             if strcmp(ResultSetdetails.protocol,'staircase') 
                 ResultSetdetails.startingstress=405-2*(0.5-rand)*ResultSetdetails.step.stepsize;
@@ -77,20 +80,25 @@ for protocolk=1:length(protocolstotest)
             %create a new sample set each time
             TestingSet.meanFS=f_createsample(TestingSet.details);
             %run the protocol
-            ResultSetraw=f_testingProtocol(TestingSet,ResultSetdetails);
-            ResultSetdetails.raw=ResultSetraw;
+            tempoj1=ResultSetdetails;
+            tempoj1.details=tempoj1;
+            ResultSettemp=f_testingProtocol(TestingSet,tempoj1);
+            ResultSetdetails.raw=ResultSettemp.raw;
             %output some useful things
             [~,~,shannonT(widthl,repeatz,:),~,progthetT(widthl,repeatz,:,:),progsigT(widthl,repeatz,:,:)]=...
-                g_calcprior(ResultSetdetails.raw.failurestress,theta,sigma,2);
+                g_calcprior(ResultSetdetails.raw.failurestress,ResultSetdetails.theta,2);
+            bigresultstemp{widthl,repeatz}=ResultSetdetails.raw.failurestress;
         end
         disp(['done width ',num2str(widthl)])
     end
+    bigresults{protocolk}=bigresultstemp;
     progthet(protocolk,:,:,:,:)=progthetT;
     progsig(protocolk,:,:,:,:)=progsigT;
-    shannon(protocolk,:,:,:)=shannonT(:,:,2:end);
+%     shannon(protocolk,:,:,:)=shannonT(:,:,2:end);
 end
 disp('Convergence test finished')
- 
+
+save('convergenceredo_200rep_30samp_largeprior.mat')
  %% Plot the figures
  % COMMENT/UNCOMMENT AS NEEDED FOR STEP vs STAIR METHODS
  

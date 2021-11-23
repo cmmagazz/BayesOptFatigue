@@ -83,10 +83,12 @@ scatter(p.Results.X(col),p.Results.Y(row),'kx')
 
 xlabel('Standard deviation /MPa')
 ylabel('Mean Failure Strength /MPa')
-caxis([0,maxval]);
+% caxis([0,maxval]);
 hold off
+
 c=colorbar;
 c.Label.String='Probability';
+
 title('Joint Posterior')
 
 time=clock;
