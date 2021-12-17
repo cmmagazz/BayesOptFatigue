@@ -6,7 +6,6 @@ function p_priorcomparison(lpriorstack,ResultSet,leg,xl,yl)
 %array, sigma limits for plot, theta limits for plot
 theta=ResultSet.details.theta{1};
 sigma=ResultSet.details.theta{2};
-
 subplot(2,2,3)
 co='grbcmyrgbcmyk'; %colors for plotting
 for i=1:length(lpriorstack)
