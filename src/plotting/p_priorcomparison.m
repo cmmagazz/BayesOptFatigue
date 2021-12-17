@@ -1,13 +1,15 @@
-function p_priorcomparison(lpriorstack,theta,sigma,leg,xl,yl)
+function p_priorcomparison(lpriorstack,ResultSet,leg,xl,yl)
 %compare between priors showing marginal mean and standard deviations as
 %well as joint posterior
 
 %INPUTS: cell array of priors to be compared, theta, sigma, legend name cell
 %array, sigma limits for plot, theta limits for plot
+theta=ResultSet.details.theta{1};
+sigma=ResultSet.details.theta{2};
 
 subplot(2,2,3)
 co='grbcmyrgbcmyk'; %colors for plotting
-for i=1:size(lpriorstack,1)
+for i=1:length(lpriorstack)
     [C,h(i)]=p_contourHPD(lpriorstack{i},'newfig',0); %create the HPD contours
     %fill in the contours
     h(i).LineColor=co(i);
@@ -26,12 +28,12 @@ end
 ylim(yl)
 xlim(xl)
 legend(h(1:i),leg); %use string to fill in legend
-ylabel('\theta /MPa')
+ylabel('\mu /MPa')
 xlabel('\sigma /MPa')
 %create marginal probability plots off to the side
 subplot(8,2,7)
 linew=1.5;
-for i=1:size(lpriorstack,1)
+for i=1:length(lpriorstack)
     plot(sigma,sum(exp(lpriorstack{i}),1),co(i),'LineWidth',linew)
     hold on
 end
@@ -40,7 +42,7 @@ ylabel('P_\sigma')
 xlim(xl)
 %create marginal probability plots off to the side
 subplot(2,8,13)
-for i=1:size(lpriorstack,1)
+for i=1:length(lpriorstack)
     plot(sum(exp(lpriorstack{i}),2),theta,co(i),'LineWidth',linew)
     hold on
 end

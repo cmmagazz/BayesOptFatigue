@@ -61,7 +61,7 @@ max2=max(exp(arraytoplot),[],'all');
 idmin=exp(arraytoplot)==max2;
 [row,col]=find(idmin);
 hold on
-scatter(p.Results.X(col),p.Results.Y(row),'kx')
+scatter(p.Results.X(floor(mean(col))),p.Results.Y(floor(mean(row))),'kx')
 
 xlabel('\sigma')
 ylabel('\theta')

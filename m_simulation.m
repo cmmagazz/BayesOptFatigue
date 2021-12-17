@@ -55,7 +55,7 @@ ResultSet.details.runout=6; %set the runout value in log(cycles)
 %     'bayes step'
 clc
 close all
-TestingSet.details.numsamp=10; %number of specimens
+TestingSet.details.numsamp=60; %number of specimens
 
 ResultSet.details.protocol = 'bayes staircase';
 %Plot a diagnostic SN curve during collection? 1=yes, 0=no
@@ -77,9 +77,7 @@ p_staircaseplot(ResultSet.raw.failurestress,'Staircase Plot',0)
 
 %% Plot the HPD
 ResultSet.raw.lprior=g_calcprior(ResultSet);
-
-p_HPD(ResultSet.raw.lprior)
-
+p_priorcomparison({ResultSet.raw.lprior},ResultSet,{'60 samples'},[0,100],[200,600])
 %% Evaluate the joint posterior from a dataset
 % ** see here to evaluate a 
 [lprior,~,shannon]=g_calcprior(ResultSet);
@@ -97,4 +95,15 @@ for i=1:size(lprior,3)
 end
 %%
 p_HPD(squeeze(sum(lprior,3)))
+%% Another type of plot looking at prior over different numbers of samples
+figure()
+ResultSetT=ResultSet;
+itotry=[10,30,60];
+l=[];
+for idx=1:length(itotry)
+    ResultSetT.raw.failurestress=ResultSet.raw.failurestress(1:itotry(idx),:);
+    l{idx}=g_calcprior(ResultSetT);
+end
+p_priorcomparison(l,ResultSet,{'10 Samples','30 Samples','60 Samples'},[1,150],[250,550])
+
 %}
