@@ -65,11 +65,11 @@ legend('Normal','Log-Normal','2-Parameter Weibull','3-Parameter Weibull','Gumbel
 print(...
     ['experimental bic for each protocol-minusoutlier'], '-dpng','-r1500')
 %% for all of it
-
+totalresults.SN.results(95,:)=[];
 % totalresults=f_SNresults(totalresults);
         [~,bigbic]=g_calcaic(totalresults.SN.results,1);
         bigbic=bigbic-repmat(bigbic(3,:),[6,1]);
-plot(bigbic')
+plot(bigbic',LineWidth=1.5)
         xlabel('Number of samples Tested')
         ylabel('\DeltaBIC')
 
@@ -83,8 +83,9 @@ plot(bigbic')
         ylim([-12,12])
 legend('Normal','Log-Normal','2-Parameter Weibull','3-Parameter Weibull','Gumbell','Frechet')
 
-        title('Experimental \Delta BIC - All Results')
+        %title('Experimental \Delta BIC - All Results')
         
-        
+%% save        
 print(...
-    ['experimental bic for all dta - minus a few'], '-dpng','-r1500')
+    ['experimental bic for all data - minus sample 95'], '-dpng','-r1500')
+savefig('experimental bic for all data - minus sample 95')
