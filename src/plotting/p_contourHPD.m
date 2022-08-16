@@ -21,15 +21,18 @@ function [c,h]=p_contourHPD(arraytoplot,varargin)
 %       saveasfigq - save as a fig? same as global by default
 
 try
-    defaultx=evalin('base','sigma');
-    defaulty=evalin('base','theta');
+    theta=evalin('base','sigma');
+    defaulty=theta{1};
+    defaultx=theta{2};
 catch
     try
-        defaultx=evalin('base','ResultSet.details.sigma');
-        defaulty=evalin('base','ResultSet.details.theta');
+        theta=evalin('base','ResultSet.details.theta');
+        defaulty=theta{1};
+        defaultx=theta{2};
     catch
-        defaultx=evalin('caller','sigma');
-        defaulty=evalin('caller','theta');
+        theta=evalin('caller','theta');
+        defaulty=theta{1};
+        defaultyx=theta{2};
     end
 end
 defaultCI=[0.5,0.9];
@@ -55,7 +58,7 @@ maxval=NaN(length(p.Results.CI),1);
 for i=1:length(p.Results.CI)
     maxval(i)=f_HPD(arraytoplot,p.Results.CI(i));
 end
-[c,h]=contour(p.Results.X,p.Results.Y,exp(arraytoplot),flipud(maxval));
+[c,h]=contour(squeeze(p.Results.X),squeeze(p.Results.Y),exp(arraytoplot),flipud(maxval));
 
 max2=max(exp(arraytoplot),[],'all');
 idmin=exp(arraytoplot)==max2;

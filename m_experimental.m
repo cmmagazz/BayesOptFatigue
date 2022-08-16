@@ -6,6 +6,9 @@
 
 resultsfilename='FatigueTestResults.mat';
 
+
+
+
 %LOAD PREVIOUS DATA:
 try
     load(resultsfilename)
@@ -15,7 +18,7 @@ end
 
 %% Sample Details:
 
-sample='a'; %input sample name
+sample='c'; %input sample name
 try 
     exists(totalresults.(sample))
     disp('Continuing test')
@@ -27,7 +30,7 @@ end
 % you can break this section while waiting for it to complete. simply
 % re-run with ctrl+enter to resume
 
-testdet.protocol    = 'bayes step'; %choose a protocol from key: 
+testdet.protocol    = 'staircase'; %choose a protocol from key: 
 %                 stress step
 %                 staircase
 %                 probit
@@ -47,7 +50,7 @@ testdet.testfreq        = 20400; %test frequency in Hz
 testdet.theta{1}=100:10:1000;
 % set upper and lower bound of possible values of sigma here
 testdet.theta{2}=1:10:200;
-testdet.dist='norm';    %model the distribution with some function (norm, lognorm, 2pwbl, 3pwbl, gev, type1)
+testdet.dist='2pwbl';    %model the distribution with some function (norm, lognorm, 2pwbl, 3pwbl, gev, type1)
 %===== any other details that are useful but not necessary
 testdet.time        =   clock; %decimal time of experiment
 testdet.torqwrench  =   4; %torque wrench setting in Nm
@@ -72,10 +75,9 @@ save(resultsfilename, 'totalresults')
 
 
 %% Prior plots
-lprior=g_calcprior(totalresults.SN.results,testdet.theta,testdet.sigma,2);
+lprior=g_calcprior(totalresults.SN.results,testdet.theta,2);
 theta=testdet.theta;
 % set upper and lower bound of possible values of sigma here
-sigma=testdet.sigma;
 p_HPD(lprior)
 
 
