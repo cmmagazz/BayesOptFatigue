@@ -20,13 +20,14 @@ TestingSet.details.DAMq=1;%damage model: 1=none, 2=miner's rule
 
 %Sample distribution types - a 2 element vector with:
 %       first  element: sample distribution: 1=gaussian, 2=weibull
-%       optional second: mean model: 1=basquin (default), 2=bi-linear
-TestingSet.details.SDistq=[1,2]; 
+%       optional second: mean model: 1=modified (default), 2=basquin,
+%       3=bi-linear,4=wohler
+TestingSet.details.SDistq=[1,1]; 
 
-TestingSet.details.numsamp=90; %number of specimens
-TestingSet.details.width=40; %width in sigma
+TestingSet.details.numsamp=1; %number of specimens
+TestingSet.details.width=0; %width in sigma
 
-TestingSet.meanFS=f_createsample(TestingSet.details,0); %create the monte-carlo sample set, 1=plot, 0=no plot
+TestingSet.meanFS=f_createsample(TestingSet.details,1); %create the monte-carlo sample set, 1=plot, 0=no plot
 
 %=============================================
 %Constant life prior constants: determine the space of parameters: 

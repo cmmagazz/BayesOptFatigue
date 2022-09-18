@@ -69,7 +69,9 @@ totalresults.SN.results(95,:)=[];
 % totalresults=f_SNresults(totalresults);
         [~,bigbic]=g_calcaic(totalresults.SN.results,1);
         bigbic=bigbic-repmat(bigbic(3,:),[6,1]);
+
 plot(bigbic',LineWidth=1.5)
+
         xlabel('Number of samples Tested')
         ylabel('\DeltaBIC')
 
@@ -81,7 +83,7 @@ plot(bigbic',LineWidth=1.5)
         yline(-6,'k-.');
         yline(-10,'k-.');
         ylim([-12,12])
-legend('Normal','Log-Normal','2-Parameter Weibull','3-Parameter Weibull','Gumbell','Frechet')
+legend('Normal','Log-Normal','2-Parameter Weibull','Location','SouthWest')%,'3-Parameter Weibull','Gumbell','Frechet')
 
         %title('Experimental \Delta BIC - All Results')
         
@@ -89,3 +91,4 @@ legend('Normal','Log-Normal','2-Parameter Weibull','3-Parameter Weibull','Gumbel
 print(...
     ['experimental bic for all data - minus sample 95'], '-dpng','-r1500')
 savefig('experimental bic for all data - minus sample 95')
+
